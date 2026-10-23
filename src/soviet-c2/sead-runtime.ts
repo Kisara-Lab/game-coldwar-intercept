@@ -2,6 +2,7 @@ import type { AirPlatformInstance, AirTrack } from "../air/types.js";
 import type { ArmEmitterRuntime } from "../arm/emitter-runtime.js";
 import type { SovietCommandEra } from "./era.js";
 import { sovietSeadCapability } from "./era.js";
+import { armEmitterTrackIsAdmissible } from "../arm/mission-integration.js";
 
 export interface SovietSeadAssignment { shooterId: string; role: "primary" | "backup"; emitterId: string; cueQuality: number; createdAt: number; expiresAt: number; }
 
@@ -12,7 +13,7 @@ export class SovietSeadRuntime {
     const capability = sovietSeadCapability(era);
     if (!capability.available) { this.assignments.clear(); return; }
     const group = aircraft.filter(a => a.alive && a.definition.id === "MIG-29A-SEAD" && a.mission === "sead");
-    const cues = group.flatMap(a => [...a.passiveTracks.values()].filter(t => t.passive?.emitterId && time - t.lastUpdate <= 12 && t.quality >= .28).map(t => ({ a, t: t as AirTrack, emitterId: t.passive!.emitterId! })));
+    const cues = group.flatMap(a => [...a.passiveTracks.values()].filter(t => t.passive?.emitterId && armEmitterTrackIsAdmissible(t, time)).map(t => ({ a, t: t as AirTrack, emitterId: t.passive!.emitterId! })));
     const byEmitter = new Map<string, typeof cues[number]>();
     for (const cue of cues) if (!byEmitter.has(cue.emitterId) || cue.t.quality > byEmitter.get(cue.emitterId)!.t.quality) byEmitter.set(cue.emitterId, cue);
     for (const [emitterId, cue] of byEmitter) {

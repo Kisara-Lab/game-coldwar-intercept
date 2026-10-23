@@ -9,7 +9,7 @@ import { AIR_WEAPONS } from "./catalog";
 import { ARM_WEAPONS } from "../arm/catalog.js";
 import { updateArmSeeker } from "../arm/seeker-runtime.js";
 import { emitterFromEntity } from "../arm/emitter-bridge.js";
-import { armReleaseAuthorization } from "../arm/mission-integration.js";
+import { armEmitterTrackIsAdmissible, armReleaseAuthorization } from "../arm/mission-integration.js";
 import { ArmEmitterRuntime, emitterActivityChanged } from "../arm/emitter-runtime.js";
 import { ARM_EMITTERS } from "../arm/catalog.js";
 import { airRadarFactors, missileWarningProbability } from "./sensors";
@@ -2804,12 +2804,12 @@ export class AirCombatSystem {
       a.nextOoda = time + 1;
       if (a.definition.id === "MIG-29A-SEAD" && !a.sovietSeadState) a.sovietSeadState = "ingress";
       const passiveTrack = [...a.passiveTracks.values()]
-        .filter((track) => time - track.lastUpdate <= 12 && track.quality >= 0.28)
+        .filter((track) => armEmitterTrackIsAdmissible(track, time))
         .sort((left, right) => right.quality - left.quality)[0];
       const track = passiveTrack as AirTrack | undefined;
       const assignment = this.sovietSead.assignmentFor(a.id, time);
       const assignedTrack = assignment
-        ? [...a.passiveTracks.values()].find(candidate => candidate.passive?.emitterId === assignment.emitterId)
+        ? [...a.passiveTracks.values()].find(candidate => candidate.passive?.emitterId === assignment.emitterId && armEmitterTrackIsAdmissible(candidate, time))
         : undefined;
       const selectedTrack = (assignedTrack ?? track) as AirTrack | undefined;
       const target = selectedTrack ? this.targetById(selectedTrack.targetId, context) : undefined;

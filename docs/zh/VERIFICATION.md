@@ -76,4 +76,4 @@ npm run build
 - WebGPU Ultra 仍是实验路径，受浏览器、驱动和平台能力限制。
 - `main.ts` 仍包含兼容路径和较多装配代码，后续需继续收敛。
 
-???????? RCS ????? [????](RADAR-MODEL.md)?
+雷达单位、视距及 RCS 校准约定见 [雷达模型](RADAR-MODEL.md)。

@@ -2,7 +2,7 @@
 
 这些参数用于游戏建模，不代表真实装备性能。
 
-水平位置、距离及平台/空中航迹的不确定度使用世界单位。`CombatPicture.Track`
+水平位置、距离及敌方平台/空中系统航迹的不确定度使用世界单位。`CombatPicture.Track`
 是历史接口，其水平 `uncertainty` 使用米；创建测量、关联门限、转交空中数据链及
 雷达绘图时通过 `uncertaintyMetersToWorld` 转换。不能因为属性同名就混用单位。
 `surfaceEsmCue` 属于平台航迹，并不使用该米制接口。

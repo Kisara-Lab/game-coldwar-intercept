@@ -1,4 +1,5 @@
 import { radarHorizonWorldUnits, radarCrossSectionFactor, SENSOR_ALTITUDE_METERS_PER_UNIT } from "../radar/model.js";
+import { pulseDopplerFactors, type PulseDopplerProfile, type DopplerObservation } from "../radar/doppler.js";
 
 export function airRadarFactors(input: {
   worldUnitsPerKm?: number;
@@ -14,6 +15,8 @@ export function airRadarFactors(input: {
   radarRangeFactor?: number;
   detectionProbabilityFactor?: number;
   measurementNoiseFactor?: number;
+  pulseDoppler?: PulseDopplerProfile;
+  dopplerObservation?: DopplerObservation;
 }) {
   const burned = input.range <= (input.burnThroughRange ?? 0);
   const jamFactor = burned ? 1 : 1 - (input.ecmStrength ?? 0) * 0.35;
@@ -59,7 +62,10 @@ export function airRadarFactors(input: {
         horizonFactor,
     ),
   );
-  return { burned, jamFactor, effectiveRange, horizon, horizonFactor, probability, quality, measurementNoiseFactor:input.measurementNoiseFactor ?? 1 };
+  const doppler = pulseDopplerFactors(input.pulseDoppler, input.dopplerObservation);
+  return { burned, jamFactor, effectiveRange, horizon, horizonFactor,
+    probability: probability * doppler.factor, quality: quality * doppler.factor,
+    dopplerFactor: doppler.factor, measurementNoiseFactor:input.measurementNoiseFactor ?? 1 };
 }
 
 export function missileWarningProbability(range: number, active: boolean) {

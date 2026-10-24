@@ -16,7 +16,7 @@ export interface Track {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   quality: number;
-  /** Horizontal error radius in metres (platform/air tracks use world units). */
+  /** Horizontal error radius in metres (enemy-platform/air tracks use world units). */
   uncertainty: number;
   altitudeEstimate: number;
   altitudeUncertainty: number;

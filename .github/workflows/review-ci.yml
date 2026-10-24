@@ -48,7 +48,7 @@ jobs:
       - name: Verify scenario scale and Tacview coordinates
         run: npm run verify:world-scale && npm run verify:acmi-export
       - name: Verify radar units and RCS calibrations
-        run: npm run verify:radar-model && npm run verify:air-sensors && npm run verify:air-guidance
+        run: npm run verify:radar-model && npm run verify:radar-doppler && npm run verify:air-sensors && npm run verify:air-guidance
       - name: Verify ARM emitter health and runtime
         run: npm run verify:arm-emitter-health && npm run verify:arm-runtime
       - name: Verify ARM catalog ballistics

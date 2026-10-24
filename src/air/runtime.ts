@@ -1850,6 +1850,12 @@ export class AirCombatSystem {
         localWeather = context.localWeatherAt?.(a.position),
         factors = airRadarFactors({
           worldUnitsPerKm: this.worldUnitsPerKm,
+          pulseDoppler: a.definition.sensor.pulseDoppler,
+          dopplerObservation: {
+            sensorPosition: a.position, sensorVelocity: a.velocity,
+            targetPosition: target.position, targetVelocity: target.velocity,
+            worldUnitsPerKm: this.worldUnitsPerKm,
+          },
           sensorAltitude: a.position.y,
           targetAltitude: target.position.y,
           range,

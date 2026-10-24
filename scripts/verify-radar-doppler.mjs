@@ -1,10 +1,35 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import ts from "typescript";
 import { readCatalogRecord } from "./catalog-record.mjs";
 import { pulseDopplerFactors } from "../dist-test/radar/doppler.js";
 import { airRadarFactors } from "../dist-test/air/sensors.js";
 
 const profiles=readCatalogRecord(new URL('../src/air/catalog.ts',import.meta.url),'AIR_RADAR_DOPPLER_PROFILES');
+// Inspect the actual sensor assignments without evaluating model factories or
+// browser imports in the catalog. Removing a capability must fail this gate.
+const catalog=ts.createSourceFile('catalog.ts',readFileSync('src/air/catalog.ts','utf8'),ts.ScriptTarget.Latest,true);
+const field=(node,name)=>node.properties.find(p=>ts.isPropertyAssignment(p)&&p.name.getText(catalog).replaceAll('"','')===name)?.initializer;
+let sensors=[];
+function visit(node) {
+  if(ts.isVariableDeclaration(node)&&node.name.getText(catalog)==='AIR_PLATFORM_DEFINITIONS') {
+    for(const entry of node.initializer.elements) {
+      if(!ts.isObjectLiteralExpression(entry))continue;
+      const id=field(entry,'id'),sensor=field(entry,'sensor');
+      if(!sensor)continue;
+      const name=field(sensor,'name').text,capability=field(sensor,'pulseDoppler');
+      sensors.push({id:id.text,name});
+      if(profiles[name]) {
+        assert.ok(capability && ts.isElementAccessExpression(capability),`${id.text} lost its capability`);
+        assert.equal(capability.expression.getText(catalog),'AIR_RADAR_DOPPLER_PROFILES');
+        assert.equal(capability.argumentExpression.text,name);
+      } else assert.equal(capability,undefined,`${id.text} unexpectedly opted into Doppler filtering`);
+    }
+  }
+  ts.forEachChild(node,visit);
+}
+visit(catalog);
+assert.deepEqual(sensors.filter(s=>profiles[s.name]).map(s=>s.id).sort(),['F-14A','MIG-29A','MIG-29A-SEAD']);
 const base={sensorPosition:{x:0,y:80,z:0}, sensorVelocity:{x:3,y:0,z:0},
   targetPosition:{x:100,y:20,z:0}, targetVelocity:{x:0,y:0,z:5}};
 const sensor={sensorAltitude:80,targetAltitude:20,range:100,nominalRange:500,
@@ -26,6 +51,10 @@ for (const [name,profile] of Object.entries(profiles)) {
   }
   const partial=pulseDopplerFactors(profile,{...base,targetVelocity:{x:profile.notchHalfWidth/2,y:0,z:4}});
   assert.equal(partial.factor,(1+profile.minimumFactor)/2);
+  // A single top-level scale controls both horizon and look-down depression.
+  const shallow={...base,sensorPosition:{...base.sensorPosition,y:25},targetPosition:{...base.targetPosition,y:20}};
+  assert.equal(airRadarFactors({...sensor,worldUnitsPerKm:10,pulseDoppler:profile,dopplerObservation:shallow}).dopplerFactor,1);
+  assert.equal(airRadarFactors({...sensor,worldUnitsPerKm:25,pulseDoppler:profile,dopplerObservation:shallow}).dopplerFactor,profile.minimumFactor);
   for (const altitude of [80,100]) assert.equal(pulseDopplerFactors(profile,
     {...base,targetPosition:{...base.targetPosition,y:altitude}}).factor,1);
   assert.equal(pulseDopplerFactors(profile,{...base,targetPosition:{...base.sensorPosition}}).factor,1);

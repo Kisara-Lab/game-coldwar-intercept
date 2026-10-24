@@ -1,3 +1,4 @@
+import { uncertaintyWorldToMeters } from "../radar/model.js";
 import * as THREE from "three";
 import { CombatPicture } from "../sim.js";
 import type { TargetableEntity } from "../combat-entity.js";
@@ -101,7 +102,7 @@ export class ShipSensorRuntime {
       if (now - passive.lastUpdate > 12) { ship.passiveTracks.delete(targetId); continue; }
       if (!next.has(targetId)) next.set(targetId, {
         targetId, position: passive.position.clone(), velocity: passive.velocity.clone(), quality: passive.quality * 0.8,
-        uncertainty: passive.uncertainty, classification: passive.classification, source: passive.source === "esm" ? "esm" : "passive-fusion", updatedAt: passive.lastUpdate, weaponQuality: false, passive,
+        uncertainty: uncertaintyWorldToMeters(passive.uncertainty, worldUnitsPerKm), classification: passive.classification, source: passive.source === "esm" ? "esm" : "passive-fusion", updatedAt: passive.lastUpdate, weaponQuality: false, passive,
       });
     }
   }

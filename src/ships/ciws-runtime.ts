@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { uncertaintyMetersToWorld } from "../radar/model.js";
 import type { DefenseTarget } from "../combat-types.js";
 import { deterministicProbabilityRoll } from "../probability.js";
 import { sourceSeed } from "../ship-defense/defense-targets.js";
@@ -10,6 +11,7 @@ export interface ShipCiwsTargetProfile {
 }
 
 export interface ShipCiwsUpdateContext {
+  worldUnitsPerKm?: number;
   resolveTarget: (targetId: string) => DefenseTarget | undefined;
   resolveHit: (target: DefenseTarget, damage: number) => boolean;
   targetProfile?: (target: DefenseTarget) => ShipCiwsTargetProfile;
@@ -105,7 +107,8 @@ export class ShipCiwsRuntime {
     const profile = context.targetProfile?.(candidate.target) ?? { pkPenalty: 0 };
     const saturation = Math.max(1, candidates.filter((entry) => entry.range <= definition.maximumRange).length);
     const trackFactor = THREE.MathUtils.clamp(
-      candidate.track.quality - candidate.track.uncertainty / Math.max(1, definition.maximumRange * 10),
+      candidate.track.quality - uncertaintyMetersToWorld(candidate.track.uncertainty, context.worldUnitsPerKm) /
+        Math.max(0.01, definition.maximumRange / 10),
       0.25,
       1,
     );

@@ -97,6 +97,8 @@ export interface FleetFormationState {
 }
 
 export interface NavalForceRuntime {
+  /** Horizontal scale; omitted by legacy fixtures means the sandbox default. */
+  worldUnitsPerKm?: number;
   id: string;
   side: CombatSide;
   doctrine: FleetDoctrine;

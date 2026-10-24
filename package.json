@@ -192,7 +192,8 @@
     "verify:world-scale": "tsc src/scenario-system/world-scale.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-world-scale.mjs",
     "verify:air-engagement-settlement": "node scripts/verify-missile-engagement-settlement.mjs",
     "verify:radar-model": "tsc src/sim.ts src/air/sensors.ts src/air/guidance.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-radar-model.mjs",
-    "verify:radar-doppler": "tsc src/air/sensors.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-radar-doppler.mjs"
+    "verify:radar-doppler": "tsc src/air/sensors.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-radar-doppler.mjs",
+    "verify:fleet-radar-scale": "tsc src/ships/sensor-runtime.ts src/fleet/force-picture.ts src/visual/tactical-radar-ship-adapter.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-fleet-radar-scale.mjs"
   },
   "dependencies": {
     "three": "^0.178.0"

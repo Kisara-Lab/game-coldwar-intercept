@@ -15,6 +15,10 @@ export function uncertaintyMetersToWorld(meters: number, unitsPerKm?: number) {
   return meters * resolveWorldUnitsPerKm(unitsPerKm) / 1000;
 }
 
+export function uncertaintyWorldToMeters(world: number, unitsPerKm?: number) {
+  return world * 1000 / resolveWorldUnitsPerKm(unitsPerKm);
+}
+
 /** These calibrations describe different nominal-range/quality contracts, not
  * different units. All inputs are game-effective square metres. Changing a
  * reference or envelope is a balance change and needs consumer-level tests.

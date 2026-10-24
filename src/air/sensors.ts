@@ -62,7 +62,7 @@ export function airRadarFactors(input: {
         horizonFactor,
     ),
   );
-  const doppler = pulseDopplerFactors(input.pulseDoppler, input.dopplerObservation);
+  const doppler = pulseDopplerFactors(input.pulseDoppler, input.dopplerObservation, input.worldUnitsPerKm);
   return { burned, jamFactor, effectiveRange, horizon, horizonFactor,
     probability: probability * doppler.factor, quality: quality * doppler.factor,
     dopplerFactor: doppler.factor, measurementNoiseFactor:input.measurementNoiseFactor ?? 1 };

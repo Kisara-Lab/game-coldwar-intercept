@@ -1854,7 +1854,6 @@ export class AirCombatSystem {
           dopplerObservation: {
             sensorPosition: a.position, sensorVelocity: a.velocity,
             targetPosition: target.position, targetVelocity: target.velocity,
-            worldUnitsPerKm: this.worldUnitsPerKm,
           },
           sensorAltitude: a.position.y,
           targetAltitude: target.position.y,

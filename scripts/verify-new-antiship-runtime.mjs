@@ -39,8 +39,9 @@ async function start(weapon, mode) {
   await page.locator("#sbZ").fill(mode === "defense" ? "-220" : "-110");
   if (mode !== "defense") {
     for (const id of ["sbRim", "sbSm2", "sbSm2er"]) await page.locator(`#${id}`).fill("0");
-    if (mode !== "ciws") await page.locator("#sbCiws").fill("0");
   }
+  // Isolate SAM and CIWS before starting, with no live control-toggle race.
+  if (mode !== "ciws") await page.locator("#sbCiws").fill("0");
   await page.evaluate(() => {
     window.threatTestEvents = [];
     new MutationObserver(records => {
@@ -59,7 +60,6 @@ async function start(weapon, mode) {
       }
     });
   }
-  if (mode === "defense") await page.getByRole("button", { name:"CIWS: AUTO", exact:true }).click();
 }
 
 try {

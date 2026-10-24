@@ -9,7 +9,8 @@ const profiles=readCatalogRecord(new URL('../src/air/catalog.ts',import.meta.url
 // Inspect the actual sensor assignments without evaluating model factories or
 // browser imports in the catalog. Removing a capability must fail this gate.
 const catalog=ts.createSourceFile('catalog.ts',readFileSync('src/air/catalog.ts','utf8'),ts.ScriptTarget.Latest,true);
-const field=(node,name)=>node.properties.find(p=>ts.isPropertyAssignment(p)&&p.name.getText(catalog).replaceAll('"','')===name)?.initializer;
+const field=(node,name)=>node.properties.find(p=>ts.isPropertyAssignment(p)&&
+  (ts.isIdentifier(p.name)||ts.isStringLiteral(p.name))&&p.name.text===name)?.initializer;
 let sensors=[];
 function visit(node) {
   if(ts.isVariableDeclaration(node)&&node.name.getText(catalog)==='AIR_PLATFORM_DEFINITIONS') {

@@ -21,10 +21,14 @@ for(const scale of [10,25]) {
   const frame=tacticalRadarFrameForShip(force,'owner',0);
   assert.equal(frame.tracks[0].uncertaintyWorld,scale,'1000 metre radius must be one kilometre on radar');
   ship.networkTracks.set('b',track('b',40));
-  const result=buildForcePicture(force,0,new ConflictTrackFusionRuntime());
-  // At scale 10 the same raw separation is outside the 20-unit gate; at 25 it
-  // is inside the 50-unit gate. This exercises the fleet's scale forwarding.
-  assert.equal([...result.values()][0].quality<.8,scale===10);
+  const fleetFusion=new ConflictTrackFusionRuntime();
+  const result=buildForcePicture(force,0,fleetFusion);
+  // Association accepts separation <= 2.4 * gate. Both scales therefore merge
+  // into one entry, but scale 10 exceeds its inner 20-unit agreement gate and
+  // degrades quality; scale 25 is within its 50-unit gate and confirms quality.
+  assert.equal(result.size,1);
+  assert.deepEqual(fleetFusion.drainEvents().map(event=>event.kind),scale===10?['conflict-detected']:[]);
+  assert.equal([...result.values()][0].quality,scale===10?.8*.88:.8+.8*.12);
   // Real ship sensor projection: active measurements remain metres and passive
   // observations cross the world-unit boundary before entering the same table.
   const sensorShip={...ship,side:'blue',emconMode:'active',nextPassiveScan:Infinity,

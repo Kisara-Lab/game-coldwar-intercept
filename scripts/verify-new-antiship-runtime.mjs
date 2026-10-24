@@ -32,7 +32,9 @@ async function start(weapon, mode) {
   assert.equal(await page.locator("#sbPlatform").inputValue(), "AIRBORNE");
   assert.equal(await page.locator("#sbType").inputValue(), weapon.id);
   await page.locator("#sbCount").fill(mode === "defense" || mode === "ciws" ? "4" : "1");
-  await page.locator("#sbInterval").fill("0.3");
+  // Separate CIWS arrivals allow physical mounts to traverse between targets;
+  // this checks interception rather than a saturated, short firing window.
+  await page.locator("#sbInterval").fill(mode === "ciws" ? "3" : "0.3");
   await page.locator("#sbSpread").fill(mode === "defense" ? "60" : "0");
   await page.locator("#sbZ").fill(mode === "defense" ? "-220" : "-110");
   if (mode !== "defense") {
@@ -57,6 +59,7 @@ async function start(weapon, mode) {
       }
     });
   }
+  if (mode === "defense") await page.getByRole("button", { name:"CIWS: AUTO", exact:true }).click();
 }
 
 try {
@@ -95,15 +98,15 @@ try {
     assert(!ew.some(text => /HOME-ON-JAM|POP-UP/.test(text)));
 
     await start(weapon, "defense");
-    await page.waitForFunction(() => window.threatTestEvents.some(text => /^(?:RIM-67|SM-2MR|SM-2ER) INTERCEPT \/|^CIWS KILL/.test(text)), null, { timeout:45000 });
+    await page.waitForFunction(() => window.threatTestEvents.some(text => /^(?:RIM-67|SM-2MR|SM-2ER) INTERCEPT \//.test(text)), null, { timeout:45000 });
     const defense = await events();
     console.log(`${weapon.id}: defensive kill passed`);
-    assert(defense.some(text => /LAUNCH|PHYSICAL RELEASE|CIWS/.test(text)), "physical defense must execute");
+    assert(defense.some(text => /LAUNCH|PHYSICAL RELEASE/.test(text)), "physical SAM defense must execute");
     await start(weapon, "ciws");
     await page.waitForFunction(() => window.threatTestEvents.some(text => /^CIWS KILL/.test(text)), null, { timeout:45000 });
     const ciws = (await events()).filter(text => /^CIWS KILL/.test(text));
     console.log(`${weapon.id}: CIWS kill passed`);
-    results.push({ id:weapon.id, terminal, impact:true, countermeasures:ew.filter(text => /CHAFF|SRBOC|ECM/.test(text)), defense:defense.filter(text => /^(?:RIM-67|SM-2MR|SM-2ER) INTERCEPT \/|^CIWS KILL/.test(text)), ciws });
+    results.push({ id:weapon.id, terminal, impact:true, countermeasures:ew.filter(text => /CHAFF|SRBOC|ECM/.test(text)), defense:defense.filter(text => /^(?:RIM-67|SM-2MR|SM-2ER) INTERCEPT \//.test(text)), ciws });
   }
   assert.deepEqual(errors, []);
   console.log(JSON.stringify({ results, errors }, null, 2));

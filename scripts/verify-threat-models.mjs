@@ -17,7 +17,11 @@ const result=THREAT_DEFINITIONS.map((definition)=>{
     assert.equal(definition.profile.homeOnJam, undefined);
     assert.equal(definition.profile.popUp, undefined);
     assert.equal(definition.profile.weave.lateral, 0);
-    if (definition.id === "RBS-15 Mk. II") assert(model.getObjectByName("control-fins").children[0].position.z < 0, "RBS-15 forward canards");
+    if (definition.id === "RBS-15 Mk. II") {
+      assert(model.getObjectByName("control-fins").children[0].position.z < 0, "RBS-15 forward canards");
+      assert.equal(model.getObjectByName("ventral-intake").geometry.type, "CylinderGeometry", "RBS-15 rounded intake housing");
+      assert.equal(model.getObjectByName("intake-opening").geometry.type, "CircleGeometry", "RBS-15 round intake opening");
+    }
     if (definition.id === "MM38 Exocet") assert.equal(model.getObjectByName("main-wings").rotation.z, Math.PI / 4);
   }
   return {id:definition.id,visualId:model.userData.weaponVisualId,forwardAxis:model.userData.forwardAxis,meshes,mapped,surfaceDetails:model.userData.surfaceDetailCount??0,particleCount:model.userData.particleCount??0,seekerFov:Boolean(model.userData.seekerFov),lod:Boolean(model.userData.assetDetailLod),bodyExtent:Number(size.z.toFixed(2))};

@@ -1,6 +1,6 @@
 # Missile Parameter Catalog
 
-> Data snapshot: v1.0.0 · 2026-07-26
+> Incoming-threat table updated against main · 2026-10-24 (Unreleased); other tables retain their earlier snapshot.
 
 [Weapons](README.md) | [中文](../../WEAPONS/MISSILE_PARAMETERS.md)
 
@@ -37,6 +37,11 @@ All distances, altitudes, and speeds below are simulation world units. They are 
 | P-700 | Sea-skimming | 2.6 / 0.4 | 9.8 / 10.8 | 220 | 6.5 | 750 | 0.70 | 36 | 38 | 0.16 |
 | Kh-22 | High altitude | 360 / 2.2 | 13.2 / 15.2 | 450 | 4.5 | 1000 | 1.10 | 26 | 46 | 0.30 |
 | RGM-84 Harpoon | Sea-skimming | 0.9 / 0.12 | 5.8 / 6.4 | 130 | 11 | 420 | 0.18 | 22 | 20 | 0.08 |
+| [R-360 Neptune](R360_NEPTUNE.md) | Sea-skimming | 0.3 / 0.1 | 5.8 / 6.4 | 130 | 11 | 500 | 0.14 | 22 | 18 | 0.08 |
+| [3M24 Uran](3M24_URAN.md) | Sea-skimming | 0.3 / 0.08 | 5.8 / 6.4 | 130 | 11 | 420 | 0.12 | 22 | 17 | 0.08 |
+| [ASM-1](ASM1_TYPE80.md) | Sea-skimming | 0.4 / 0.14 | 5.8 / 6.4 | 130 | 11 | 360 | 0.13 | 22 | 18 | 0.08 |
+
+The three additions support sandbox and scenario JSON `in-flight` waves only, without physical launch platforms or aircraft. HOJ, pop-up and weaving are disabled. Default range means spawn distance, not real-world maximum range. Individual pages separate public references from game assumptions and limits.
 
 Harpoon selects from three skim entries and one pop-up entry. Pop-up begins at 48 world units and peaks at altitude 2.4. HOJ becomes eligible at jamming strength 0.42 with residual-error factor 0.18. Kh-22 has an additional CIWS probability cap of 0.14.
 

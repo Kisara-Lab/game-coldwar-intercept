@@ -102,6 +102,7 @@
     "verify:ship-interceptor-models": "tsc src/models/ship-interceptors.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-ship-interceptor-models.mjs",
     "verify:threat-models": "tsc src/threats/catalog.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-threat-models.mjs",
     "verify:threat-visual-runtime": "node scripts/verify-threat-visual-runtime.mjs",
+    "verify:new-antiship-runtime": "node scripts/verify-new-antiship-runtime.mjs",
     "verify:ship-interceptor-visual-runtime": "node scripts/verify-ship-interceptor-visual-runtime.mjs",
     "verify:air-visuals": "node scripts/verify-air-visuals.mjs",
     "capture:aircraft-assets-ultra": "node scripts/capture-aircraft-assets-ultra.mjs",

@@ -8,9 +8,9 @@
  * grid silently disagreed with its own instruments. This module is the single place
  * that resolves the scale, and the runtime and the radar both read it.
  *
- * Distances stay in world units everywhere else in the simulation; only display
- * conversion uses this value, so resolving it differently never moves a platform,
- * a missile, or a sensor volume.
+ * Positions and distances stay in world units. Sensor horizons and metre-valued
+ * measurement errors also use this scale; changing it does not move existing
+ * platform or missile positions.
  */
 
 /** The scale every built-in scenario declares, and the fallback for the sandbox. */

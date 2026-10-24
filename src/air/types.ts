@@ -109,6 +109,8 @@ export interface AirWeaponDefinition {
 }
 
 export interface AirSensorDefinition {
+  /** Optional game-scaled look-down clutter filter, configured by the catalog. */
+  pulseDoppler?: import("../radar/doppler.js").PulseDopplerProfile;
   name: string;
   range: number;
   updateInterval: number;

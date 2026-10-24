@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { airRadarFactors, missileWarningProbability } from "../dist-test/sensors.js";
+import { airRadarFactors, missileWarningProbability } from "../dist-test/air/sensors.js";
 
 const clear = airRadarFactors({sensorAltitude:70,targetAltitude:90,range:250,nominalRange:520,targetRcs:28,radarHealth:1,precision:.88});
 const jammed = airRadarFactors({sensorAltitude:70,targetAltitude:90,range:250,nominalRange:520,targetRcs:28,radarHealth:1,precision:.88,ecmStrength:.68,burnThroughRange:48});

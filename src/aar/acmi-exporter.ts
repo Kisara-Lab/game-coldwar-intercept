@@ -1,3 +1,4 @@
+import { SENSOR_ALTITUDE_METERS_PER_UNIT } from "../radar/model.js";
 import type { AarEvent, AarSnapshot } from "../combat-types";
 import { resolveWorldUnitsPerKm } from "../scenario-system/world-scale.js";
 
@@ -35,7 +36,7 @@ function isTerminal(object: AcmiObject): boolean {
   return object.disabled === true || object.state === "destroyed";
 }
 
-const ALTITUDE_METERS = 50;
+const ALTITUDE_METERS = SENSOR_ALTITUDE_METERS_PER_UNIT;
 
 function clean(value: string): string {
   return value.replace(/[\r\n,=]/g, " ").trim();

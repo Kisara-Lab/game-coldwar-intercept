@@ -11,6 +11,7 @@ export interface ShipTrackEstimate {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   quality: number;
+  /** Horizontal uncertainty in metres, including passive and CEC projections. */
   uncertainty: number;
   classification: "unknown" | "aircraft" | "ship" | "missile";
   source: "local-radar" | "link11" | "link16" | "esm" | "passive-fusion";

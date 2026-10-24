@@ -1,8 +1,8 @@
-function radarHorizonWorldUnits(aMeters: number, bMeters: number) {
-  return 41.2 * (Math.sqrt(Math.max(0, aMeters)) + Math.sqrt(Math.max(0, bMeters)));
-}
+import { radarHorizonWorldUnits, radarCrossSectionFactor, SENSOR_ALTITUDE_METERS_PER_UNIT } from "../radar/model.js";
+import { pulseDopplerFactors, type PulseDopplerProfile, type DopplerObservation } from "../radar/doppler.js";
 
 export function airRadarFactors(input: {
+  worldUnitsPerKm?: number;
   sensorAltitude: number;
   targetAltitude: number;
   range: number;
@@ -15,17 +15,20 @@ export function airRadarFactors(input: {
   radarRangeFactor?: number;
   detectionProbabilityFactor?: number;
   measurementNoiseFactor?: number;
+  pulseDoppler?: PulseDopplerProfile;
+  dopplerObservation?: DopplerObservation;
 }) {
   const burned = input.range <= (input.burnThroughRange ?? 0);
   const jamFactor = burned ? 1 : 1 - (input.ecmStrength ?? 0) * 0.35;
   const effectiveRange =
     input.nominalRange *
-    Math.pow(Math.max(0.05, input.targetRcs / 8), 0.25) *
+    radarCrossSectionFactor(input.targetRcs, "airSearch") *
     input.radarHealth *
     jamFactor * (input.radarRangeFactor ?? 1);
   const horizon = radarHorizonWorldUnits(
-    Math.max(3, input.sensorAltitude * 50),
-    Math.max(1, input.targetAltitude * 50),
+    Math.max(3, input.sensorAltitude * SENSOR_ALTITUDE_METERS_PER_UNIT),
+    Math.max(1, input.targetAltitude * SENSOR_ALTITUDE_METERS_PER_UNIT),
+    input.worldUnitsPerKm,
   );
   const horizonFactor =
     input.range <= horizon
@@ -59,7 +62,10 @@ export function airRadarFactors(input: {
         horizonFactor,
     ),
   );
-  return { burned, jamFactor, effectiveRange, horizon, horizonFactor, probability, quality, measurementNoiseFactor:input.measurementNoiseFactor ?? 1 };
+  const doppler = pulseDopplerFactors(input.pulseDoppler, input.dopplerObservation, input.worldUnitsPerKm);
+  return { burned, jamFactor, effectiveRange, horizon, horizonFactor,
+    probability: probability * doppler.factor, quality: quality * doppler.factor,
+    dopplerFactor: doppler.factor, measurementNoiseFactor:input.measurementNoiseFactor ?? 1 };
 }
 
 export function missileWarningProbability(range: number, active: boolean) {

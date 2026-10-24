@@ -1,3 +1,4 @@
+import { uncertaintyMetersToWorld, uncertaintyWorldToMeters } from "../radar/model.js";
 import * as THREE from "three";
 import type { ShipTrackEstimate } from "../ships/types.js";
 
@@ -31,11 +32,11 @@ export class ConflictTrackFusionRuntime {
   private readonly resolvedUntil = new Map<string, number>();
   private readonly events: TrackFusionEvent[] = [];
 
-  fuse(reports: readonly { track:ShipTrackEstimate; contributor:string }[], now:number) {
+  fuse(reports: readonly { track:ShipTrackEstimate; contributor:string }[], now:number, worldUnitsPerKm?:number) {
     const fused = new Map<string, ShipTrackEstimate>();
     const touched = new Set<string>();
     for (const {track:candidate,contributor} of [...reports].sort((a,b)=>b.track.quality-a.track.quality)) {
-      const associated = [...fused.entries()].map(([key,current])=>({key,current,separation:current.position.distanceTo(candidate.position),gate:Math.max(15,(current.uncertainty+candidate.uncertainty)/100)}))
+      const associated = [...fused.entries()].map(([key,current])=>({key,current,separation:current.position.distanceTo(candidate.position),gate:Math.max(15,uncertaintyMetersToWorld(current.uncertainty+candidate.uncertainty,worldUnitsPerKm))}))
         .filter(({current,separation,gate})=>current.classification===candidate.classification&&separation<=gate*2.4)
         .sort((a,b)=>a.separation-b.separation)[0];
       if (!associated) {
@@ -70,14 +71,14 @@ export class ConflictTrackFusionRuntime {
         }
         this.conflicts.set(conflictKey,state);
         current.quality=Math.max(.03,current.quality*.88);
-        current.uncertainty=Math.max(current.uncertainty,separation*100*.55);
+        current.uncertainty=Math.max(current.uncertainty,uncertaintyWorldToMeters(separation,worldUnitsPerKm)*.55);
         current.contributors=state.contributors;
         continue;
       }
       const state=this.conflicts.get(conflictKey);
       if(state){
         state.confirmations++;state.lastSeen=now;state.lastSeparation=separation;touched.add(conflictKey);
-        if(state.confirmations<3){current.quality=Math.max(.03,current.quality*.94);current.uncertainty=Math.max(current.uncertainty,separation*100);continue;}
+        if(state.confirmations<3){current.quality=Math.max(.03,current.quality*.94);current.uncertainty=Math.max(current.uncertainty,uncertaintyWorldToMeters(separation,worldUnitsPerKm));continue;}
         this.events.push({kind:"conflict-resolved",trackId:conflictKey,separation,contributors:state.contributors,confirmations:state.confirmations});
         this.conflicts.delete(conflictKey);
         this.resolvedUntil.set(conflictKey,now+RESOLUTION_HYSTERESIS_SECONDS);

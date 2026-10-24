@@ -1,3 +1,4 @@
+import { uncertaintyMetersToWorld } from "../radar/model.js";
 import type { ShipWeapon } from "../ship-types.js";
 import { WEAPON_PROFILES } from "../interceptor-data.js";
 import type { ShipCombatantInstance, ShipTrackEstimate } from "../ships/types.js";
@@ -29,7 +30,7 @@ export function assessFleetAirThreat(force: NavalForceRuntime, track: ShipTrackE
   return { score, timeToImpact, range };
 }
 
-function associateLocalTrack(forceTrack: ShipTrackEstimate, ship: ShipCombatantInstance) {
+function associateLocalTrack(forceTrack: ShipTrackEstimate, ship: ShipCombatantInstance, worldUnitsPerKm?: number) {
   const exact = ship.localTracks.get(forceTrack.targetId);
   if (exact?.weaponQuality && exact.classification === forceTrack.classification) return exact;
   return [...ship.localTracks.values()]
@@ -37,7 +38,7 @@ function associateLocalTrack(forceTrack: ShipTrackEstimate, ship: ShipCombatantI
     .map((track) => ({
       track,
       separation: track.position.distanceTo(forceTrack.position),
-      gate: Math.max(18, (track.uncertainty + forceTrack.uncertainty) / 100),
+      gate: Math.max(18, uncertaintyMetersToWorld(track.uncertainty + forceTrack.uncertainty, worldUnitsPerKm)),
     }))
     .filter(({ separation, gate }) => separation <= gate)
     .sort((a, b) => a.separation - b.separation)[0]?.track;
@@ -89,7 +90,7 @@ function shooterUtility(
   channels.illuminate = Math.max(0, channels.illuminate - plannedChannels);
   if (fireControl < 0.35 || launcherHealth < 0.25 || channels.launch < 1 || channels.illuminate < 1)
     return undefined;
-  const localTrack = associateLocalTrack(forceTrack, ship);
+  const localTrack = associateLocalTrack(forceTrack, ship, force.worldUnitsPerKm);
   if (!localTrack) return undefined;
   const range = ship.position.distanceTo(localTrack.position);
   const weapon = selectWeapon(force, ship, range, timeToImpact < 38);

@@ -3,7 +3,7 @@ import {
   radarSeekerCaptureProbability,
   seekerMeasurementPoint,
   semiActiveIlluminationValid,
-} from "../dist-test/guidance.js";
+} from "../dist-test/air/guidance.js";
 
 const phoenixMidcourse = radarSeekerCaptureProbability({
   range: 140,

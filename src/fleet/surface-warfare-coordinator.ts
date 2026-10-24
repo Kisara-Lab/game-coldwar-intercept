@@ -1,15 +1,16 @@
+import { uncertaintyMetersToWorld } from "../radar/model.js";
 import type { ShipCombatantInstance, ShipTrackEstimate } from "../ships/types.js";
 import type { NavalForceRuntime, SurfaceStrikeAssignment } from "./types.js";
 
 const ASSIGNMENT_LIFE = 18;
 
-function localSurfaceTrack(ship: ShipCombatantInstance, forceTrack: ShipTrackEstimate) {
+function localSurfaceTrack(ship: ShipCombatantInstance, forceTrack: ShipTrackEstimate, worldUnitsPerKm?: number) {
   const exact = ship.localTracks.get(forceTrack.targetId);
   if (exact && exact.classification === "ship" && exact.weaponQuality) return exact;
   return [...ship.localTracks.values()]
     .filter((track) => track.classification === "ship" && track.weaponQuality)
     .map((track) => ({ track, distance: track.position.distanceTo(forceTrack.position) }))
-    .filter(({ distance }) => distance <= Math.max(16, forceTrack.uncertainty / 60))
+    .filter(({ distance }) => distance <= Math.max(16, uncertaintyMetersToWorld(forceTrack.uncertainty, worldUnitsPerKm) * (5 / 3)))
     .sort((a, b) => a.distance - b.distance)[0]?.track;
 }
 
@@ -18,7 +19,7 @@ function eligibleShooter(force: NavalForceRuntime, ship: ShipCombatantInstance, 
   if (!ship.alive || !strike || ship.magazines.surfaceStrike <= 0) return undefined;
   const radar = (ship.subsystemHealth.get("primaryRadar") ?? 0) / 100;
   const fireControl = (ship.subsystemHealth.get("fireControl") ?? 0) / 100;
-  const local = localSurfaceTrack(ship, track);
+  const local = localSurfaceTrack(ship, track, force.worldUnitsPerKm);
   if (!local || radar < 0.18 || fireControl < 0.25) return undefined;
   const range = ship.position.distanceTo(local.position);
   if (range < strike.minRange || range > strike.maxRange || local.quality < strike.requiredTrackQuality) return undefined;

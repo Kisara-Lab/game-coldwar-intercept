@@ -1,3 +1,4 @@
+import { uncertaintyMetersToWorld } from "../radar/model.js";
 import type { NavalForceRuntime } from "../fleet/types";
 import type { TacticalRadarFrame, TacticalRadarSource } from "./tactical-radar";
 
@@ -35,7 +36,7 @@ export function tacticalRadarFrameForShip(
       vx: track.velocity.x,
       vz: track.velocity.z,
       quality: track.quality,
-      uncertaintyWorld: track.uncertainty,
+      uncertaintyWorld: uncertaintyMetersToWorld(track.uncertainty, force.worldUnitsPerKm),
       classification: track.classification,
       source: radarSource(track.source),
       updatedAt: track.updatedAt,

@@ -1,3 +1,4 @@
+import { uncertaintyMetersToWorld, SENSOR_ALTITUDE_METERS_PER_UNIT } from "./radar/model.js";
 import * as THREE from "three";
 import { isTypingTarget } from "./input";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -2956,7 +2957,7 @@ const airScenarioContext = createAirScenarioContext(() => {
         position: track.position,
         velocity: track.velocity,
         quality: track.quality,
-        uncertainty: track.uncertainty * worldUnitsPerKm / 1000,
+        uncertainty: uncertaintyMetersToWorld(track.uncertainty, worldUnitsPerKm),
         lastUpdate: track.lastSeen,
         classification:
           target.entity.kind === "aircraft"
@@ -3480,6 +3481,8 @@ function applyScenarioToSandbox(compiled: CompiledScenario | null) {
   worldUnitsPerKm = resolveWorldUnitsPerKm(compiled?.document.simulation.worldUnitsPerKm);
   tacticalRadar.setWorldScale(worldUnitsPerKm);
   airCombat.setWorldScale(worldUnitsPerKm);
+  combatPicture.setWorldScale(worldUnitsPerKm);
+  surfacePicture.setWorldScale(worldUnitsPerKm);
   activeCompiledScenario = compiled;
   activeScenarioSession = compiled ? new ScenarioSession(compiled) : null;
   activeScenarioDocument = compiled?.document ?? null;
@@ -4431,7 +4434,7 @@ function captureAarSnapshot(force = false) {
     // Render models carry asset-axis correction rotations which are not flight attitude.
     roll: 0,
     speed: velocity.length() * 100,
-    verticalSpeed: velocity.y * 50,
+    verticalSpeed: velocity.y * SENSOR_ALTITUDE_METERS_PER_UNIT,
   });
   const shipVelocity = new THREE.Vector3(1, 0, 0)
     .applyAxisAngle(new THREE.Vector3(0, 1, 0), defender.rotation.y)
@@ -5314,6 +5317,7 @@ function updateShipManeuver(dt: number) {
               activeShip.platform.significantHeightMeters,
             enemyPlatform?.definition.significantHeightMeters ??
               activeShip.platform.significantHeightMeters,
+            worldUnitsPerKm,
           ),
           desiredRange =
             directSurfaceTrack &&
@@ -6184,7 +6188,7 @@ setInterval(() => {
           RADAR_PIXELS_PER_WORLD_UNIT,
       uncertainty = Math.max(
         3,
-        (surfaceTrack.uncertainty * worldUnitsPerKm / 1000) * RADAR_PIXELS_PER_WORLD_UNIT,
+        uncertaintyMetersToWorld(surfaceTrack.uncertainty, worldUnitsPerKm) * RADAR_PIXELS_PER_WORLD_UNIT,
       );
     radarCtx.strokeStyle = surfaceTrack.quality > 0.62 ? "#ff6758" : "#ffb347";
     radarCtx.fillStyle = "#ff6758";
@@ -6239,7 +6243,7 @@ setInterval(() => {
             : "#bd78ff",
       uncertainty = Math.max(
         2,
-        (track.uncertainty * worldUnitsPerKm / 1000) * RADAR_PIXELS_PER_WORLD_UNIT,
+        uncertaintyMetersToWorld(track.uncertainty, worldUnitsPerKm) * RADAR_PIXELS_PER_WORLD_UNIT,
       );
     radarCtx.strokeStyle = color;
     radarCtx.globalAlpha = 0.28;
@@ -7148,7 +7152,7 @@ function updateCombat(dt: number) {
           id,
           position: target.mesh.position,
           velocity: target.velocity,
-          altitude: target.mesh.position.y * 50,
+          altitude: target.mesh.position.y * SENSOR_ALTITUDE_METERS_PER_UNIT,
           rcs: target.rcs,
         }))
       : [],
@@ -7164,8 +7168,9 @@ function updateCombat(dt: number) {
     dt,
     allDefenseTargets().flatMap((target) => target.entity ? [{
       entity: target.entity,
-      altitudeMeters: target.mesh.position.y * 50,
+      altitudeMeters: target.mesh.position.y * SENSOR_ALTITUDE_METERS_PER_UNIT,
     }] : []),
+    worldUnitsPerKm,
   );
   fleetIntegration?.updateNetwork(elapsed, link16Input.checked);
   fleetIntegration?.updateAirDefense(elapsed, dt);
@@ -7682,7 +7687,7 @@ function updateCombat(dt: number) {
       if (!i.mesh.userData.trajectoryProfileLogged) {
         i.mesh.userData.trajectoryProfileLogged = true;
         log(
-          `${i.weapon} SEA-SKIMMER FORWARD INTERCEPT / ${i.target.threatType} / CRUISE ALT ${Math.round(lowAltitudeCorridor * 50)} m`,
+          `${i.weapon} SEA-SKIMMER FORWARD INTERCEPT / ${i.target.threatType} / CRUISE ALT ${Math.round(lowAltitudeCorridor * SENSOR_ALTITUDE_METERS_PER_UNIT)} m`,
         );
       }
     } else if (i.age < profile.boost)
@@ -8842,6 +8847,7 @@ function tick(now: number) {
           opforRadarEnabled,
           radarEnabled,
           redWaypoint?.position,
+          worldUnitsPerKm,
         );
         if (platformUpdate.maneuverChanged)
           log(

@@ -1,3 +1,5 @@
+import { uncertaintyWorldToMeters } from "../radar/model.js";
+import { resolveWorldUnitsPerKm } from "../scenario-system/world-scale.js";
 import * as THREE from "three";
 import type { TargetableEntity } from "../combat-entity.js";
 import type { DefenseTarget, Interceptor } from "../combat-types.js";
@@ -202,8 +204,9 @@ export class FleetSceneIntegration {
     for (const launcher of this.launchers) launcher.update(now, dt);
   }
 
-  updateSensors(now: number, dt: number, observations: readonly ShipSensorObservation[]) {
-    for (const ship of this.force.ships.values()) this.sensors.update(ship, now, dt, observations, this.localWeatherAt);
+  updateSensors(now: number, dt: number, observations: readonly ShipSensorObservation[], worldUnitsPerKm?: number) {
+    this.force.worldUnitsPerKm = resolveWorldUnitsPerKm(worldUnitsPerKm);
+    for (const ship of this.force.ships.values()) this.sensors.update(ship, now, dt, observations, this.localWeatherAt, worldUnitsPerKm);
     if (this.scenarioCecEnabled()) this.collectCecMeasurements(now);
   }
 
@@ -225,7 +228,7 @@ export class FleetSceneIntegration {
             position: track.position.clone(),
             velocity: track.velocity.clone(),
             quality: track.quality,
-            uncertainty: Math.sqrt(Math.max(0, track.covariance.positionVariance)),
+            uncertainty: uncertaintyWorldToMeters(Math.sqrt(Math.max(0, track.covariance.positionVariance)), this.force.worldUnitsPerKm),
             classification: "aircraft",
             source: "passive-fusion",
             updatedAt: track.lastMeasurementAt,
@@ -329,6 +332,7 @@ export class FleetSceneIntegration {
     for (const launcher of this.launchers) launcher.executeAssignments(now);
     if (this.ciwsEnabled && this.options.resolveDefenseTarget && this.options.resolveCiwsHit) {
       for (const ship of this.companions) this.ciws.update(ship, now, dt, {
+        worldUnitsPerKm: this.force.worldUnitsPerKm,
         resolveTarget: (targetId) => this.options.resolveDefenseTarget?.(targetId),
         resolveHit: this.options.resolveCiwsHit,
         targetProfile: this.options.ciwsTargetProfile,

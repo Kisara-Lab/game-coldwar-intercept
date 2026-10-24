@@ -85,7 +85,7 @@ try {
     assert(terminal.altitude > 0 && terminal.altitude < .5 && terminal.range < 130);
     await page.waitForFunction(id => window.threatTestEvents.some(text => text.includes(`${id} IMPACT`)), weapon.id, { timeout:30000 });
     console.log(`${weapon.id}: terminal and impact passed`);
-    assert((await events()).some(text => text.includes(`${weapon.damage}% DAMAGE`)));
+    assert((await events()).some(text => text.startsWith(`${weapon.id} IMPACT / ${weapon.damage}% DAMAGE / `)), "impact damage must match this weapon exactly");
     assert(Number(await page.locator("#scene").getAttribute("data-ship-hull")) < 100);
 
     await start(weapon, "ew");

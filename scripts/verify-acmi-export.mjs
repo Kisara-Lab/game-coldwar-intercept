@@ -247,6 +247,7 @@ for (const name of ["R-360 Neptune", "3M24 Uran", "ASM-1"]) {
   );
   assert(exported.includes(`Name=${name},`), `${name}: ACMI must preserve the catalog identity`);
   const id = exported.split("\n").find((line) => line.includes(`Name=${name},`))?.split(",")[0];
+  assert(id && /^[0-9a-f]+$/i.test(id) && Number.parseInt(id, 16) > 0, `${name}: ACMI identity must have a valid object ID`);
   assert(exported.split("\n").filter((line) => line === `0,Event=Destroyed|${id}`).length === 1, `${name}: exactly one destruction event`);
 }
 console.log(JSON.stringify({ bytes: acmi.length, frames: 3, aircraftCreates: aircraftLines.length }, null, 2));

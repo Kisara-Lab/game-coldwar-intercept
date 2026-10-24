@@ -239,4 +239,15 @@ assert(acmi.includes("0,Event=Message|AIM-54A LAUNCH"), "timeline event missing"
 assert(acmi.includes("Name=AEW LINK4A AEW-opaque-01")&&acmi.includes("C2Layer=AEWInterceptControl")&&acmi.includes("WeaponAuthority=No")&&!acmi.includes("ControllerTrack=fighter-1"),"AEW command metadata or truth isolation missing");
 const aircraftLines = acmi.split("\n").filter((line) => line.includes("Name=F-14A Tomcat"));
 assert(aircraftLines.length === 1, "stable aircraft was recreated instead of updated");
+for (const name of ["R-360 Neptune", "3M24 Uran", "ASM-1"]) {
+  const missile = { id: 100, threatType:name, phase:"terminal", x:0, y:.2, z:-30, heading:0, pitch:0, roll:0, speed:6, verticalSpeed:0 };
+  const exported = exportTacviewAcmi(
+    [{ ...base, time:0, missiles:[missile] }, { ...base, time:1, missiles:[{ ...missile, phase:"destroyed" }] }],
+    [], projectionOptions,
+  );
+  assert(exported.includes(`Name=${name},`), `${name}: ACMI must preserve the catalog identity`);
+  const id = exported.split("\n").find((line) => line.includes(`Name=${name},`))?.split(",")[0];
+  assert(id && /^[0-9a-f]+$/i.test(id) && Number.parseInt(id, 16) > 0, `${name}: ACMI identity must have a valid object ID`);
+  assert(exported.split("\n").filter((line) => line === `0,Event=Destroyed|${id}`).length === 1, `${name}: exactly one destruction event`);
+}
 console.log(JSON.stringify({ bytes: acmi.length, frames: 3, aircraftCreates: aircraftLines.length }, null, 2));

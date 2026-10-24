@@ -1,12 +1,25 @@
 import * as THREE from "three";
+import assert from "node:assert/strict";
 globalThis.window={devicePixelRatio:1};
 const { THREAT_DEFINITIONS }=await import("../dist-test/threats/catalog.js");
 
 const result=THREAT_DEFINITIONS.map((definition)=>{
   const model=definition.createModel();let meshes=0,mapped=0;
   model.traverse((object)=>{if(!object.isMesh)return;meshes++;const materials=Array.isArray(object.material)?object.material:[object.material];if(materials.some((material)=>material.map&&material.roughnessMap&&material.normalMap))mapped++;});
+  // Hidden sensor cones and particle buffers are not airframe dimensions.
+  for (const key of ["particleTrail", "seekerFov", "shockCone"]) model.userData[key]?.removeFromParent();
   const box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
+  if (["R-360 Neptune", "3M24 Uran", "ASM-1"].includes(definition.id)) {
+    assert.equal(Boolean(model.getObjectByName("ventral-intake")), definition.id !== "ASM-1");
+    const body = model.getObjectByName("airframe-body");
+    assert(body && model.getObjectByName("radar-radome") && model.getObjectByName("engine-nozzle"));
+    assert(size.z > size.x * 2, `${definition.id}: slender missile silhouette`);
+    assert.equal(definition.profile.homeOnJam, undefined);
+    assert.equal(definition.profile.popUp, undefined);
+    assert.equal(definition.profile.weave.lateral, 0);
+  }
   return {id:definition.id,visualId:model.userData.weaponVisualId,forwardAxis:model.userData.forwardAxis,meshes,mapped,surfaceDetails:model.userData.surfaceDetailCount??0,particleCount:model.userData.particleCount??0,seekerFov:Boolean(model.userData.seekerFov),lod:Boolean(model.userData.assetDetailLod),bodyExtent:Number(size.z.toFixed(2))};
 });
 console.log(JSON.stringify(result,null,2));
-if(result.length!==5||result.some((model)=>model.visualId!==model.id||model.forwardAxis!=="-Z"||model.meshes<15||model.mapped<7||model.surfaceDetails<5||model.particleCount<2||!model.seekerFov||!model.lod)||new Set(result.map((model)=>model.bodyExtent)).size<4)process.exitCode=1;
+for (const id of ["P-15 Termit", "P-500", "P-700", "Kh-22", "RGM-84 Harpoon", "R-360 Neptune", "3M24 Uran", "ASM-1"]) assert(result.some((model) => model.id === id), `missing ${id}`);
+if(result.some((model)=>model.visualId!==model.id||model.forwardAxis!=="-Z"||model.meshes<15||model.mapped<7||model.surfaceDetails<5||model.particleCount<2||!model.seekerFov||!model.lod)||new Set(result.map((model)=>model.bodyExtent)).size<4)process.exitCode=1;

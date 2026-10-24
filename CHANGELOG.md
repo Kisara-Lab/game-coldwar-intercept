@@ -7,6 +7,7 @@ v1.21.1; it does not announce a new release or change the package/HUD version.
 
 ### Added
 
+- R-360 Neptune, baseline 3M24 Uran and Type 80 ASM-1 as independent in-flight sandbox/scenario threats, with procedural models, raid presets and bilingual references. No new launcher or aircraft compatibility; no inherited Harpoon HOJ, pop-up or weaving capability.
 - Passive IRST/ESM sensing, passive-track fusion and platform EMCON states (#12).
 - Measurement-level CEC, covariance fusion, network diagnostics and engagement support in the explicit `cec-enabled` era (#16). Link 11/16 remain separate services.
 - Anti-radiation emitter tracking, seeker acquisition/loss/reacquisition and era-gated SEAD missions (#18). `MIG-29A-SEAD` and `Kh-31P-C` are fictional late-Soviet capabilities.

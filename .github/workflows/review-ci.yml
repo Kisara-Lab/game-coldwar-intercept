@@ -43,6 +43,9 @@ jobs:
       - name: Verify documentation links
         run: npm run verify:docs
 
+      - name: Verify incoming missile models and scenario references
+        run: npm run verify:threat-models && npm run verify:scenario-system
+
       - name: Verify seeker-specific defensive axes
         run: npm run verify:advanced-air-defense-axis
       - name: Verify scenario scale and Tacview coordinates
@@ -86,7 +89,7 @@ jobs:
   domain-verification:
     name: Domain verification
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       APP_URL: http://127.0.0.1:5173/
 
@@ -131,6 +134,9 @@ jobs:
 
       - name: Verify setup fields isolate keyboard shortcuts
         run: npm run verify:setup-keyboard-focus
+
+      - name: Verify Neptune, Uran and ASM-1 runtime paths
+        run: npm run verify:new-antiship-runtime
 
       - name: Stop browser smoke server
         if: always()

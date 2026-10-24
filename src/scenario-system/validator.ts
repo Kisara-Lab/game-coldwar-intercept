@@ -9,6 +9,7 @@ import {
   SCENARIO_AIR_WEAPON_IDS,
   SCENARIO_COAST_BACKDROP_IDS,
   SCENARIO_ENVIRONMENT_PRESET_IDS,
+  SCENARIO_IN_FLIGHT_ONLY_THREAT_IDS,
   SCENARIO_SHIP_LOADOUT_IDS,
   SCENARIO_THREAT_IDS,
   SCENARIO_TIME_OF_DAY_IDS,
@@ -240,6 +241,7 @@ export function validateScenarioDocument(input: unknown, catalogs: ScenarioValid
     else if (!knownThreats.has(wave.threatId)) fail(`${path}.threatId`, `Unknown threat ${wave.threatId}`);
     if (wave.side !== "blue" && wave.side !== "red") fail(`${path}.side`, "Threat side must be blue or red");
     if (wave.source !== "in-flight" && wave.source !== "surface-platform") fail(`${path}.source`, "Unknown threat source");
+    if (wave.source === "surface-platform" && SCENARIO_IN_FLIGHT_ONLY_THREAT_IDS.includes(String(wave.threatId))) fail(`${path}.source`, "This threat currently supports in-flight waves only; no physical launch platform is registered");
     if (wave.source === "surface-platform" && (!text(wave.sourcePlatformId) || !entityIds.has(wave.sourcePlatformId))) fail(`${path}.sourcePlatformId`, "Surface-platform wave requires a valid source entity");
     if (!Number.isInteger(wave.count) || Number(wave.count) < 1 || Number(wave.count) > 48) fail(`${path}.count`, "Wave count must be 1..48");
     if (!finite(wave.firstLaunchAt) || wave.firstLaunchAt < 0) fail(`${path}.firstLaunchAt`, "First launch time must be non-negative");

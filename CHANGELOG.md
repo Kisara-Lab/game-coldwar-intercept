@@ -1,6 +1,50 @@
 # Changelog
 
-> Documentation snapshot: v1.20.0 · 2026-08-02. Later releases may revise these notes.
+Release history follows repository tags. `Unreleased` describes changes on main after
+v1.21.1; it does not announce a new release or change the package/HUD version.
+
+## Unreleased
+
+### Added
+
+- Passive IRST/ESM sensing, passive-track fusion and platform EMCON states (#12).
+- Measurement-level CEC, covariance fusion, network diagnostics and engagement support in the explicit `cec-enabled` era (#16). Link 11/16 remain separate services.
+- Anti-radiation emitter tracking, seeker acquisition/loss/reacquisition and era-gated SEAD missions (#18). `MIG-29A-SEAD` and `Kh-31P-C` are fictional late-Soviet capabilities.
+- Shared radar horizon, named RCS profiles and uncertainty conversions, plus catalog-gated look-down pulse-Doppler filtering for AWG-9/N019 air search (#36). This is a game-scale detection/track-quality model, not a PRF, terrain or seeker simulation.
+
+### Fixed
+
+- Reserve return fuel when planning strike missions (#17).
+- Keep setup-field typing from activating sandbox hotkeys (#19); prevent the About panel from intercepting ECM controls (#36).
+- Apply scenario `worldUnitsPerKm` to distance displays, radar geometry and horizontal Tacview export (#20), and preserve metre/world-unit uncertainty boundaries in fleet tracks (#36).
+- Use seeker-specific observed defensive axes and noise-dependent turn tie-breaking without exposing hidden aircraft positions (#23, #24).
+- Respect emitter health, emission edges, reset lifecycle and catalogued ARM flight ceilings; add the missing Kh-31P-C seeker profile and share emitter-track admissibility policy (#25, #27–#30).
+- Settle the owning engagement ledger when an air missile is hard-killed (#31).
+
+### Maintenance
+
+- Read shipped ARM catalog literals through a non-executing TypeScript AST reader for ballistics verification (#26).
+- Expand Review CI with input, scale, radar, ARM, defensive-axis and engagement-settlement regressions. Refresh current architecture, source maps and bilingual version notes.
+
+## 1.21.1 - 2026-08-12
+
+### Fixed
+
+- Reworked Full-Spectrum Blackout orchestration, strike-wave execution and command messages (#10, #11).
+- Corrected launch/store management, mission and formation orders, objective outcomes including escaped threats, and scenario command/phase overrides.
+- Added full-duration, simulation-rate and strike-corridor regression coverage.
+
+### Documentation
+
+- Music documentation (#8) and live-demo discovery/SEO updates (#9).
+
+## 1.21.0 - 2026-08-05
+
+### Added
+
+- Versioned JSON scenario validation, normalization, migration, compilation, import/export and session/runtime boundaries, with legacy adapters (#7).
+- Full-Spectrum Blackout joint scenario, opening briefing, guidance, objectives, deterministic weather/space-weather zones, Link 11/16 propagation degradation and lost-comms doctrine.
+- Dynamic score/theme runtimes and Silent Meridian music assets; weather/network diagnostics and track-conflict fusion.
 
 ## 1.20.0 - 2026-08-02
 

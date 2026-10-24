@@ -1,7 +1,7 @@
 # 验证与发布
 
-> 文档数据戳：v1.0.0 · 2026-07-26<br>
-> 本页描述 v1.0.0 当前实现；后续版本可能变更。
+> 当前 main 验证入口 · 核对日期：2026-10-24。<br>
+> 最近发布标签为 v1.21.1；下列命令说明验证范围，不代表本次运行过所有用例。
 
 [返回 README](../../README.md) | [机制手册](SIMULATION.md) | [架构与扩展](ARCHITECTURE.md) | [操作与 AAR](OPERATIONS.md)
 
@@ -28,10 +28,14 @@ npm run build
 | 苏联 C2 | `verify:soviet-gci-runtime`, `verify:soviet-maritime-runtime`, `verify:soviet-salvo-runtime` |
 | AAR/ACMI | `verify:acmi-export`, `verify:fleet-aar`, `verify:datalink-aar` |
 | WebGPU Ultra | `verify:webgpu-ultra`, `verify:webgpu-ultra-active` |
+| 文档与发现入口 | `verify:docs`, `verify:seo` |
+| 尺度与雷达 | `verify:world-scale`, `verify:radar-model`, `verify:radar-doppler`, `verify:fleet-radar-scale` |
+| 被动传感器与 CEC | `verify:passive-sensors`, `verify:cec-runtime`, `verify:cec-engagement` |
+| ARM 生命周期与交战结算 | `verify:arm-emitter-health`, `verify:air-engagement-settlement` |
 
 完整命令清单以 `package.json` 的 `scripts` 为准。
 
-## v1.0 证据矩阵
+## 代表性证据矩阵
 
 | 功能 | 权威证据 | 类型 |
 |---|---|---|
@@ -53,20 +57,24 @@ npm run build
 5. 实体发射必须验证 owner、弹药、发射点、导弹对象和画面，不得用 DOM 计数替代。
 6. WebGPU 失败时应明确报告 capability/fallback，不能静默伪装成 Ultra 成功。
 
-## v1.0 发布门槛
+## Review CI
+
+`.github/workflows/review-ci.yml` 定义构建/文档和分域检查，并单独执行浏览器冒烟与设置输入保护。分域覆盖防御轴、场景尺度/ACMI、雷达、ARM、年代限制、航迹策略与交战结算。具体步骤以工作流为准；文档检查不替代运行时验证。TypeScript 编译共用 `dist-test`，相关命令顺序执行，避免输出互相覆盖。
+
+## 发布门槛
 
 - [ ] 中文入口与子文档无乱码，内部链接有效。
 - [ ] 英文入口与中文结构一致，明确其维护状态。
-- [ ] `package.json` 版本更新为 `1.0.0`。
-- [ ] 新增 `CHANGELOG.md`，记录 v1.0 功能、边界和已知问题。
+- [ ] 按目标版本同步 `package.json`、锁文件与 HUD；当前基线为 `1.21.1`。
+- [ ] 将已验证的 Unreleased 改动整理到目标版本的 `CHANGELOG.md`，记录边界与已知问题。
 - [ ] 生产构建通过。
 - [ ] 舰队实体发射、联合空战、AAR/ACMI 和默认单舰回归通过。
 - [ ] WebGL 高画质通过；WebGPU Ultra 能力检测和 fallback 通过。
 - [ ] 文档中的命令、平台目录和许可证与源码一致。
 - [ ] 工作区不包含密钥、参考资料、临时构建或无关截图提交。
-- [ ] GitHub `main` 与本地一致，创建签名明确的 `v1.0.0` tag 和 Release Notes。
+- [ ] GitHub `main` 与本地一致；获准发布后创建与目标提交对应的版本标签和 Release Notes。
 
-在上述门槛全部有证据前，不创建 v1.0 标签。
+发布前逐项保留证据；仅更新文档不创建版本标签。
 
 ## 当前已知边界
 

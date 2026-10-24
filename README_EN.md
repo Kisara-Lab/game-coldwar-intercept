@@ -2,8 +2,10 @@
 
 **A 3D Cold War naval and joint-air combat sandbox.** The observable chain runs from radar measurements, track quality, datalinks, and fire-control authorization through physical launchers, phased guidance, electronic warfare, damage, and AAR.
 
-> Documentation snapshot: v1.20.0 · 2026-08-02<br>
-> This page describes the v1.20.0 implementation; later versions may change mechanisms, visuals, and unit data.
+> Current main documentation · reviewed 2026-10-24. Latest release tag: v1.21.1 (2026-08-12).<br>
+> Main includes later work. [CHANGELOG](CHANGELOG.md) separates releases from Unreleased; the package and HUD version have not been bumped.
+
+The v1.21 scenario platform adds versioned JSON import/export, briefings, guidance, deterministic space weather, Link 11/16 propagation degradation, lost-comms doctrine and the Full-Spectrum Blackout joint scenario. See the [scenario platform](wiki/en/SCENARIOS/SCENARIO_PLATFORM.md).
 
 ## Live Demo
 
@@ -11,7 +13,7 @@
 
 No installation is required. Desktop Edge or Chrome is recommended. Initial asset and shader compilation may take several seconds. Use High quality on limited hardware; WebGPU Ultra, compute clouds, and the FFT ocean are experimental high-load features.
 
-[中文](README.md) · [English Wiki](wiki/en/README.md) · [Chinese Wiki](wiki/README.md) · [V1.20 Release](https://github.com/Sekai6/game-coldwar-intercept/releases/tag/v1.20.0) · [Changelog](CHANGELOG.md)
+[中文](README.md) · [English Wiki](wiki/en/README.md) · [Chinese Wiki](wiki/README.md) · [Latest Release](https://github.com/Sekai6/game-coldwar-intercept/releases/latest) · [Changelog](CHANGELOG.md)
 
 ![USS Lake Champlain CG-57 Ultra aurora combat validation](readme-cg57-ultra-aurora.png)
 
@@ -70,6 +72,7 @@ A dedicated surface-asset gallery captures 18 fixed Ultra/High/Standard views se
 - Advanced flight AI, aerodynamic envelopes, throttle regimes, fuel, and damage management.
 - WebGL high-quality rendering and an experimental WebGPU Ultra path.
 - After Action Review and Tacview ACMI export.
+- Later main capabilities: IRST/ESM and EMCON, separately era-gated CEC, ARM/SEAD and catalog-controlled look-down Doppler filtering for air search. See [version boundaries](wiki/en/VERSIONING.md) and the [radar specification](docs/zh/RADAR-MODEL.md).
 
 ## Telemetry and Analysis
 
@@ -123,19 +126,36 @@ src/fleet/        force runtime, formations, Link 11, command, and tasking
 src/ships/        independent ship execution, EW, CIWS, and damage control
 src/ship-defense/ shared ship-defense target, engagement, launcher, and visual runtimes
 src/datalink/     Link 11/16 protocols, era configuration, and observability
+src/cec/          measurement/covariance fusion, networking and engagement support
+src/defense/      shared target sources, observed selection and engagement settlement
+src/sensors/      passive IRST/ESM
+src/arm/          emitters, seeker lifecycle and SEAD
+src/radar/        horizon, RCS, unit conversions and air-search Doppler filtering
+src/tracks/       track-conflict fusion
 src/soviet-c2/    Soviet GCI, maritime targeting, and salvo coordination
 src/threats/      incoming-weapon catalog and models
 src/scenarios/    scenario-owned initial state and settings
+src/scenario-system/ versioned JSON, compilation, session, objectives and commands
+src/space-weather/ timeline, spatial effects and propagation
+src/environment/  weather fronts
+src/lost-comms/   loss/recovery doctrine
+src/audio/        dynamic score and theme-track lifecycle
+src/platforms/    enemy platform catalog, models and execution
+src/surface/      surface-asset gallery
 src/aar/          AAR and ACMI recording/export
 src/visual/       ocean, atmosphere, clouds, lighting, and WebGPU experiments
 src/models/       procedural ship, aircraft, and weapon models
 src/main.ts       composition root, frame scheduling, UI, and compatibility bridges
+src/input.ts      typing-target checks and hotkey guards
 scripts/          logic, browser, screenshot, and regression verification
+docs/             architecture, simulation, scenario, radar and verification guides
+wiki/             bilingual mechanics, platform, weapon and scenario index
+.github/workflows/ Review CI
 ```
 
 ## Project Status
 
-The current version line is `v1.20.0`, displayed as `V1.20` in the web HUD. Feature boundaries and verification evidence are listed in [CHANGELOG.md](CHANGELOG.md).
+The package version is `1.21.1`, displayed as `V1.21.1` in the web HUD. Later main changes remain Unreleased; see [CHANGELOG.md](CHANGELOG.md) for release boundaries.
 
 ## License
 

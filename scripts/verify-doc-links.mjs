@@ -1,19 +1,12 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-
-import { readdirSync } from "node:fs";
 
 const documents = [
   "README.md",
   "README_EN.md",
   "ARCHITECTURE.md",
-  "docs/WEBGPU_RENDERER_MIGRATION.md",
-  "docs/WEBGPU_ULTRA.md",
-  "docs/zh/SIMULATION.md",
-  "docs/zh/ARCHITECTURE.md",
-  "docs/zh/OPERATIONS.md",
-  "docs/zh/VERIFICATION.md",
+  "CHANGELOG.md",
 ];
 
 function collectMarkdown(directory) {
@@ -24,7 +17,7 @@ function collectMarkdown(directory) {
   }).map((path) => path.replace(`${resolve(".")}${process.platform === "win32" ? "\\" : "/"}`, "").replaceAll("\\", "/"));
 }
 
-documents.push(...collectMarkdown("wiki"));
+documents.push(...collectMarkdown("docs"), ...collectMarkdown("wiki"));
 
 const failures = [];
 let checked = 0;

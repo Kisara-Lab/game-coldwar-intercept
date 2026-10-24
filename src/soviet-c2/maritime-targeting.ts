@@ -1,3 +1,4 @@
+import { radarCrossSectionFactor } from "../radar/model.js";
 import * as THREE from "three";
 import type { SovietCommandEra } from "./era.js";
 import { SOVIET_COMMAND_ERAS } from "./era.js";
@@ -177,7 +178,7 @@ export class SovietMaritimeTargetingNetwork {
         this.dropped++;
         continue;
       }
-      const rcsQuality = THREE.MathUtils.clamp(Math.pow(Math.max(0.05, target.radarCrossSection / 12000), 0.25), 0.22, 1);
+      const rcsQuality = radarCrossSectionFactor(target.radarCrossSection, "maritimeCue");
       const quality = THREE.MathUtils.clamp((source === "legenda" ? 0.67 : 0.55) * (0.72 + rcsQuality * 0.28), 0.28, 0.72);
       const major = parameters.uncertaintyMajor * (1.18 - quality * 0.35);
       const minor = parameters.uncertaintyMinor * (1.15 - quality * 0.3);

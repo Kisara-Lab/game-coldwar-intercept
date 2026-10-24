@@ -1,3 +1,4 @@
+import { SENSOR_ALTITUDE_METERS_PER_UNIT } from "../radar/model.js";
 import * as THREE from "three";
 import { observedIlluminatorPosition, tacticalTrackNumber } from "./ai/illuminator-observation.js";
 import { DEFAULT_WORLD_UNITS_PER_KM, resolveWorldUnitsPerKm } from "../scenario-system/world-scale.js";
@@ -982,7 +983,7 @@ export class AirCombatSystem {
       this.emit(
         time,
         "guidance",
-        `${aircraft.definition.name} GCI COMMAND RECEIVED / ${command.controllerTrackId} / ${command.commandMode.toUpperCase()} / Q ${Math.round(command.quality * 100)}% / ALT ${Math.round(command.commandedAltitude * 50)}M / SPD ${Math.round(command.commandedSpeed * 360)}KMH / RADAR ${Math.round(command.radarActivationRange * 100)}M / VALID ${(command.expiresAt - time).toFixed(1)}S`,
+        `${aircraft.definition.name} GCI COMMAND RECEIVED / ${command.controllerTrackId} / ${command.commandMode.toUpperCase()} / Q ${Math.round(command.quality * 100)}% / ALT ${Math.round(command.commandedAltitude * SENSOR_ALTITUDE_METERS_PER_UNIT)}M / SPD ${Math.round(command.commandedSpeed * 360)}KMH / RADAR ${Math.round(command.radarActivationRange * 100)}M / VALID ${(command.expiresAt - time).toFixed(1)}S`,
       );
     }
     this.sovietMaritimeTargeting.update(
@@ -1848,6 +1849,7 @@ export class AirCombatSystem {
             : undefined,
         localWeather = context.localWeatherAt?.(a.position),
         factors = airRadarFactors({
+          worldUnitsPerKm: this.worldUnitsPerKm,
           sensorAltitude: a.position.y,
           targetAltitude: target.position.y,
           range,

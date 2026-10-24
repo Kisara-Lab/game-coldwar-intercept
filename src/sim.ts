@@ -1,3 +1,6 @@
+import { radarHorizonWorldUnits, radarCrossSectionFactor, uncertaintyMetersToWorld, SENSOR_ALTITUDE_METERS_PER_UNIT } from "./radar/model.js";
+import { resolveWorldUnitsPerKm } from "./scenario-system/world-scale.js";
+export { radarHorizonWorldUnits } from "./radar/model.js";
 import * as THREE from "three";
 
 export type TrackQuality = "unknown" | "suspect" | "classified";
@@ -13,6 +16,7 @@ export interface Track {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   quality: number;
+  /** Horizontal error radius in metres (platform/air tracks use world units). */
   uncertainty: number;
   altitudeEstimate: number;
   altitudeUncertainty: number;
@@ -72,13 +76,12 @@ export const DEFAULT_SENSORS: SensorDefinition[] = [
   },
 ];
 
-export function radarHorizonWorldUnits(aMeters: number, bMeters: number) {
-  return 41.2 * (Math.sqrt(Math.max(0, aMeters)) + Math.sqrt(Math.max(0, bMeters)));
-}
 
 // Game-scaled sensor model. Relationships are physical; values are not system specifications.
 export class CombatPicture {
   readonly tracks = new Map<number, Track>();
+  private worldUnitsPerKm = resolveWorldUnitsPerKm(undefined);
+  setWorldScale(declared?: number) { this.worldUnitsPerKm = resolveWorldUnitsPerKm(declared); }
   private rng = 0x41c64e6d;
   private nextTrackId = 1;
   private events: string[] = [];
@@ -104,7 +107,7 @@ export class CombatPicture {
     return this.rng / 0xffffffff;
   }
   private radarHorizon(aMeters: number, bMeters: number) {
-    return radarHorizonWorldUnits(aMeters, bMeters);
+    return radarHorizonWorldUnits(aMeters, bMeters, this.worldUnitsPerKm);
   }
   private angleDelta(a: number, b: number) {
     return Math.atan2(Math.sin(a - b), Math.cos(a - b));
@@ -130,7 +133,7 @@ export class CombatPicture {
         deviation = Math.hypot(dx, dz),
         gate = Math.max(
           8,
-          (track.uncertainty / 100) * 1.6 + velocity.length() * revisit * 1.8,
+          uncertaintyMetersToWorld(track.uncertainty, this.worldUnitsPerKm) * 1.6 + velocity.length() * revisit * 1.8,
         ),
         score = deviation / gate;
       if (score < bestScore) {
@@ -243,7 +246,7 @@ export class CombatPicture {
         const range = target.position.distanceTo(sensorPosition),
           effective =
             sensor.maxRange *
-            Math.pow(Math.max(0.05, target.rcs / 0.5), 0.25) *
+            radarCrossSectionFactor(target.rcs, "shipSearch") *
             targetHealth * (environment.rangeFactor ?? 1);
         if (range > effective * 1.05) continue;
         const horizon = this.radarHorizon(sensor.radarHeight, target.altitude),
@@ -277,7 +280,7 @@ export class CombatPicture {
         const errorMeters =
             (Math.pow(1 - measuredQuality, 1.65) * 4200 + this.rand() * 500) /
             sensor.precision * (environment.measurementNoiseFactor ?? 1),
-          errorWorld = errorMeters / 100;
+          errorWorld = uncertaintyMetersToWorld(errorMeters, this.worldUnitsPerKm);
         const measuredPosition = target.position
           .clone()
           .add(
@@ -291,7 +294,7 @@ export class CombatPicture {
           ? Math.max(80, errorMeters * 0.16)
           : Math.max(5000, target.altitude * 0.8);
         measuredPosition.y = sensor.threeDimensional
-          ? target.position.y + ((this.rand() - 0.5) * altitudeError) / 50
+          ? target.position.y + ((this.rand() - 0.5) * altitudeError) / SENSOR_ALTITUDE_METERS_PER_UNIT
           : 0.6;
         const existing = this.associate(
           measuredPosition,
@@ -342,7 +345,7 @@ export class CombatPicture {
           existing.lastSeen = now;
           existing.horizonLimited = horizonLimited;
           if (sensor.threeDimensional) {
-            existing.altitudeEstimate = measuredPosition.y * 50;
+            existing.altitudeEstimate = measuredPosition.y * SENSOR_ALTITUDE_METERS_PER_UNIT;
             existing.altitudeUncertainty = altitudeError;
             existing.altitudeKnown = true;
             existing.lastAltitudeUpdate = now;
@@ -370,7 +373,7 @@ export class CombatPicture {
             quality: measuredQuality,
             uncertainty: errorMeters,
             altitudeEstimate: sensor.threeDimensional
-              ? measuredPosition.y * 50
+              ? measuredPosition.y * SENSOR_ALTITUDE_METERS_PER_UNIT
               : 0,
             altitudeUncertainty: altitudeError,
             altitudeKnown: sensor.threeDimensional,

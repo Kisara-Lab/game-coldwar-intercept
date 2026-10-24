@@ -18,12 +18,14 @@ export class ShipSensorRuntime {
     dt: number,
     observations: readonly ShipSensorObservation[],
     localWeather?: (position: THREE.Vector3) => { radarRangeFactor:number; detectionProbabilityFactor:number; measurementNoiseFactor:number },
+    worldUnitsPerKm?: number,
   ) {
     let picture = this.pictures.get(ship.id);
     if (!picture) {
       picture = new CombatPicture(ship.definition.sensors);
       this.pictures.set(ship.id, picture);
     }
+    picture.setWorldScale(worldUnitsPerKm);
     if (!ship.alive) {
       ship.localTracks.clear();
       ship.passiveTracks.clear();

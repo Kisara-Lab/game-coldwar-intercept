@@ -202,8 +202,8 @@ export class FleetSceneIntegration {
     for (const launcher of this.launchers) launcher.update(now, dt);
   }
 
-  updateSensors(now: number, dt: number, observations: readonly ShipSensorObservation[]) {
-    for (const ship of this.force.ships.values()) this.sensors.update(ship, now, dt, observations, this.localWeatherAt);
+  updateSensors(now: number, dt: number, observations: readonly ShipSensorObservation[], worldUnitsPerKm?: number) {
+    for (const ship of this.force.ships.values()) this.sensors.update(ship, now, dt, observations, this.localWeatherAt, worldUnitsPerKm);
     if (this.scenarioCecEnabled()) this.collectCecMeasurements(now);
   }
 

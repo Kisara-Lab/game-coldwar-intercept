@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import type { EnemyType } from "../threats/catalog";
-import { radarHorizonWorldUnits } from "../sim";
+import { radarHorizonWorldUnits, radarCrossSectionFactor } from "../radar/model.js";
 import type {
   EnemyPlatformDefinition,
   EnemyPlatformInstance,
@@ -429,6 +429,7 @@ export function updateEnemyPlatform(
   sensorsEnabled: boolean,
   targetEmitting: boolean,
   patrolWaypoint?: THREE.Vector3,
+  worldUnitsPerKm?: number,
 ) {
   const damageEvents = updatePlatformCasualties(platform, elapsed);
   const previousManeuverMode = platform.maneuverMode;
@@ -495,6 +496,7 @@ export function updateEnemyPlatform(
               radarHorizonWorldUnits(
                 sensor.radarHeight,
                 targetSignificantHeightMeters,
+        worldUnitsPerKm,
               ),
             ),
           ),
@@ -575,7 +577,7 @@ export function updateEnemyPlatform(
     state.nextUpdate = elapsed + definition.updateInterval;
     const effectiveRange =
       definition.maxRange *
-      Math.pow(Math.max(0.05, targetRadarCrossSection / 10), 0.25);
+      radarCrossSectionFactor(targetRadarCrossSection, "surfaceSearch");
     const ratio = range / Math.max(1, effectiveRange);
     const health =
       platform.destroyed || !sensorsEnabled || platform.emconMode !== "active"
@@ -584,6 +586,7 @@ export function updateEnemyPlatform(
     const horizon = radarHorizonWorldUnits(
         definition.radarHeight,
         targetSignificantHeightMeters,
+                worldUnitsPerKm,
       ),
       horizonFactor =
         range > horizon

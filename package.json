@@ -54,7 +54,7 @@
     "verify:aircraft-sam-damage": "node scripts/verify-aircraft-sam-damage.mjs",
     "verify:air-strike-defense": "node scripts/verify-air-strike-defense.mjs",
     "verify:air-hardpoints": "node scripts/verify-air-hardpoints.mjs",
-    "verify:air-guidance": "tsc src/air/guidance.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-air-guidance.mjs",
+    "verify:air-guidance": "tsc src/air/guidance.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-air-guidance.mjs",
     "verify:air-dynamics": "tsc src/air/flight-dynamics.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-air-dynamics.mjs",
     "verify:advanced-air-flight": "tsc src/air/ai/flight-director.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-advanced-air-flight.mjs",
     "verify:advanced-air-aerodynamics": "tsc src/air/flight/aerodynamic-model.ts src/air/flight/aircraft-performance.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-advanced-air-aerodynamics.mjs",
@@ -87,7 +87,7 @@
     "verify:arm-ballistics": "node --experimental-strip-types scripts/verify-arm-ballistics.mjs",
     "verify:soviet-sead-era": "tsc src/scenario-system/validator.ts src/scenario-system/compiler.ts src/scenario-system/normalizer.ts --rootDir src --outDir dist-test-scenario --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-soviet-sead-era.mjs",
     "verify:passive-sensors": "tsc src/sensors/passive-types.ts src/sensors/passive-runtime.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-passive-sensors.mjs",
-  "verify:arm-track-policy": "node --experimental-strip-types scripts/verify-arm-track-policy.mjs",
+    "verify:arm-track-policy": "node --experimental-strip-types scripts/verify-arm-track-policy.mjs",
     "verify:cec-runtime": "tsc src/cec/runtime.ts src/cec/measurement-runtime.ts src/cec/fusion-runtime.ts src/cec/network-runtime.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-cec-runtime.mjs",
     "verify:cec-engagement": "node --experimental-strip-types scripts/verify-cec-engagement.mjs",
     "verify:strike-wave": "tsc src/air/strike-wave-runtime.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-strike-wave-runtime.mjs",
@@ -178,7 +178,7 @@
     "verify:ship-defense-runtime": "tsc src/defense/allegiance.ts src/ship-defense/defense-targets.ts src/ship-defense/engagement-runtime.ts src/ship-defense/launcher-runtime.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-ship-defense-runtime.mjs",
     "verify:vls-runtime": "tsc src/ship-defense/launcher-runtime.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-vls-runtime.mjs",
     "verify:track-source-ids": "tsc src/sim.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-track-source-ids.mjs",
-    "verify:air-sensors": "tsc src/air/sensors.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-air-sensors.mjs",
+    "verify:air-sensors": "tsc src/air/sensors.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-air-sensors.mjs",
     "verify:radar-countermeasures": "tsc src/radar-countermeasures.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-radar-countermeasures.mjs",
     "verify:anti-ship-guidance": "tsc src/anti-ship-guidance.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-anti-ship-guidance.mjs",
     "verify:acmi-export": "tsc src/aar/acmi-exporter.ts --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-acmi-export.mjs",
@@ -190,7 +190,8 @@
     "verify:c2-space-weather": "tsc src/space-weather/types.ts src/space-weather/catalog.ts src/space-weather/timeline-runtime.ts src/space-weather/propagation-effects.ts src/soviet-c2/era.ts src/soviet-c2/gci-network.ts src/soviet-c2/maritime-targeting.ts src/soviet-c2/fleet-command.ts src/air/aew/command-network.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-c2-space-weather.mjs",
     "verify:arm-emitter-health": "node --experimental-strip-types scripts/verify-arm-emitter-health.mjs",
     "verify:world-scale": "tsc src/scenario-system/world-scale.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-world-scale.mjs",
-    "verify:air-engagement-settlement": "node scripts/verify-missile-engagement-settlement.mjs"
+    "verify:air-engagement-settlement": "node scripts/verify-missile-engagement-settlement.mjs",
+    "verify:radar-model": "tsc src/sim.ts src/air/sensors.ts src/air/guidance.ts --rootDir src --outDir dist-test --module ESNext --moduleResolution bundler --target ES2022 --skipLibCheck && node scripts/verify-radar-model.mjs"
   },
   "dependencies": {
     "three": "^0.178.0"

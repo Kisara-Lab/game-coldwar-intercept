@@ -1,3 +1,4 @@
+import { radarCrossSectionFactor } from "../radar/model.js";
 export function seekerFieldOfViewEligible(input: {
   range: number;
   seekerRange: number;
@@ -34,7 +35,7 @@ export function radarSeekerCaptureProbability(input: {
 }) {
   if (!seekerFieldOfViewEligible(input)) return 0;
   const ratio = input.range / Math.max(1, input.seekerRange);
-  const rcsFactor = Math.max(0.32, Math.min(1.25, Math.pow(input.targetRcs / 8, 0.25)));
+  const rcsFactor = radarCrossSectionFactor(input.targetRcs, "airSeeker");
   const burnedThrough = input.range <= input.burnThroughRange;
   const jammingPenalty = burnedThrough
     ? 1

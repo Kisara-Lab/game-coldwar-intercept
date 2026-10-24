@@ -3521,6 +3521,9 @@ function applyScenarioToSandbox(compiled: CompiledScenario | null) {
   const initialWave = compiled.threatWaves[0];
   if (initialWave) {
     platformSelect.value = initialWave.source === "in-flight" ? "AIRBORNE" : platformSelect.value;
+    // Rebuild options after changing source: a scenario can also contain a red
+    // surface ship whose physical slots do not accept the in-flight wave type.
+    syncPlatformThreatOptions();
     (sandbox.querySelector("#sbType") as HTMLSelectElement).value = initialWave.threatId;
     setNumberInput("#sbCount", initialWave.count);
     setNumberInput("#sbInterval", initialWave.intervalSeconds);

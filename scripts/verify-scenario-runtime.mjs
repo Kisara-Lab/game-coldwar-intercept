@@ -26,6 +26,18 @@ for (const [index, value] of malformed.entries()) {
 assert.throws(() => importScenarioJson("{"), SyntaxError);
 assert.equal(validateScenarioDocument(document, { shipDefinitions: ["long-beach"] }).valid, false);
 
+for (const threatId of ["R-360 Neptune", "3M24 Uran", "ASM-1"]) {
+  const wave = { id:"new-wave", threatId, side:"red", source:"in-flight", count:2, firstLaunchAt:0, intervalSeconds:1.5, origin:[0,.3,-420], altitude:.3, spread:80 };
+  const candidate = { ...document, threatWaves:[wave] };
+  const imported = importScenarioJson(JSON.stringify(candidate));
+  assert.equal(importScenarioJson(exportScenarioJson(imported)).threatWaves[0].threatId, threatId);
+  const platformWave = { ...wave, source:"surface-platform", sourcePlatformId:"red-moskva" };
+  const rejected = validateScenarioDocument({ ...document, threatWaves:[platformWave] });
+  assert(!rejected.valid && rejected.issues.some((issue) => issue.path === "threatWaves[0].source"), `${threatId} must not claim a physical launcher`);
+  const invalidAir = { ...document, forces:document.forces.map((force) => force.id === "blue-f14-cap" ? { ...force, loadout:{ [threatId]:1 } } : force) };
+  assert.equal(validateScenarioDocument(invalidAir).valid, false, `${threatId} is not an aircraft loadout`);
+}
+
 const unknownReferenceCases = [
   ["environment preset", { ...document, environment: { ...document.environment, presetId: "unknown-environment" } }, "environment.presetId"],
   ["time of day", { ...document, environment: { ...document.environment, timeOfDay: "midnight-sunrise" } }, "environment.timeOfDay"],

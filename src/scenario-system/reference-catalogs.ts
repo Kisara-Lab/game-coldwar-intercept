@@ -65,4 +65,12 @@ export const SCENARIO_THREAT_IDS = [
   "P-700",
   "Kh-22",
   "RGM-84 Harpoon",
+  "R-360 Neptune",
+  "3M24 Uran",
+  "ASM-1",
 ] as const;
+
+/** No physical launch platform is supplied for these catalog additions yet. */
+export const SCENARIO_IN_FLIGHT_ONLY_THREAT_IDS: readonly string[] = [
+  "R-360 Neptune", "3M24 Uran", "ASM-1",
+];

@@ -1,13 +1,13 @@
 # NTU Intercept
 
-## v1.21 开发分支：全频带阻塞干扰
+## v1.21 场景平台：全频带阻塞干扰
 
 新增版本化JSON场景平台、场景导入导出、开场作战简报、三档动态引导、确定性空间天气、Link 11/16传播退化、平台失联条令和“极夜断链”联合场景。场景数据与运行时执行彻底分离，为后续剧情场景和沙盒场景编辑器保留统一格式。详见[场景平台文档](docs/zh/SCENARIO_SYSTEM.md)。
 
 **冷战海空联合交战与导弹拦截 3D 沙盘。** 从雷达探测、航迹质量、数据链和火控授权，到实体发射器、分阶段制导、电子战、毁伤与 AAR，整条交战链都可以观察和复核。
 
-> 文档数据戳：v1.21.1 正式版 · 2026-08-12<br>
-> 本页同时覆盖 v1.20 稳定版与 v1.21 预发布场景；预发布机制、画面和单位数据仍可能调整。
+> 当前 main 文档 · 核对日期：2026-10-24。最近发布标签为 v1.21.1（2026-08-12）。<br>
+> main 已包含后续改动；[CHANGELOG](CHANGELOG.md) 区分已发布版本与 Unreleased，包版本与 HUD 暂未升级。
 
 ## 在线演示
 
@@ -80,6 +80,7 @@ v1.20.0 对 USS Long Beach (CGN-9)、USS Lake Champlain (CG-57) 与 Project 1164
 - 高级飞行 AI、空气动力学包线、推力档位、燃油与损伤管理。
 - WebGL 高画质和实验性 WebGPU Ultra 渲染路径。
 - AAR 与 Tacview ACMI 导出。
+- main 后续能力：IRST/ESM 与 EMCON、独立年代限制的 CEC、ARM/SEAD，以及目录控制的空中搜索下视多普勒过滤。游戏化口径和限制见[雷达模型](docs/zh/RADAR-MODEL.md)与[版本说明](wiki/VERSIONING.md)。
 
 ## 遥测与数据分析
 
@@ -136,14 +137,31 @@ src/
   ships/           独立舰艇运行时、传感器、武器、ECM、CIWS 与毁伤
   ship-defense/    通用舰载交战、目标、发射器和视觉运行时
   datalink/        Link 11、Link 16、年代配置与可观测性
+  cec/             独立测量融合、协方差、网络与交战支持
+  defense/         共享目标源、观测选择与交战结算
+  sensors/         被动 IRST/ESM
+  arm/             辐射源、寻的与 SEAD
+  radar/           视距、RCS、单位换算与搜索多普勒过滤
+  tracks/          航迹冲突融合
   soviet-c2/       苏联 GCI、海上目标指示和齐射协调
   threats/         反舰导弹目录及模型
   scenarios/       场景数据
+  scenario-system/ 版本化 JSON、编译、会话、目标、引导与指令
+  space-weather/   空间天气时序、区域与传播影响
+  environment/     天气锋面
+  lost-comms/      失联恢复条令
+  audio/           动态配乐与主题音轨
+  platforms/       敌方平台目录、模型与执行
+  surface/         水面资产画廊
   aar/             AAR、ACMI 记录与下载
   visual/          海洋、大气、云、光照及 WebGPU 实验路径
   models/          程序化舰船、飞机和武器模型
   main.ts          场景装配、帧循环、UI 与兼容桥接
+  input.ts         输入目标判断与快捷键保护
 scripts/           逻辑、浏览器、截图和回归验证
+docs/              架构、机制、场景、雷达与验证文档
+wiki/              中英文机制、平台、武器和场景索引
+.github/workflows/ Review CI
 ```
 
 ## 项目状态

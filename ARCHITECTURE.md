@@ -1,13 +1,32 @@
 # Architecture
 
-> Documentation snapshot: v1.0.0 · 2026-07-26<br>
-> This page describes the v1.0.0 implementation and may change later.
+> Current main architecture · reviewed 2026-10-24.<br>
+> Package/HUD remain v1.21.1. Post-release changes are tracked under [Unreleased](CHANGELOG.md); historical tags retain their own implementation boundaries.
 
 The optional Ultra aurora environment is owned by `src/visual/aurora-runtime.ts`. It encapsulates the separate menu opt-in, Ultra gate, lighting/ocean overrides, diagnostics, and lifecycle; `src/visual/aurora-environment.ts` owns the layered curtain shader. `main.ts` only assembles dependencies and invokes the runtime lifecycle.
 
 The simulation is organized around capabilities rather than ship-name checks.
 
 ## Module ownership
+
+The directory-level map below complements the detailed ownership list. The [Chinese guide](docs/zh/ARCHITECTURE.md) covers extension steps; [verification](docs/zh/VERIFICATION.md) lists regression entry points.
+
+| Source | Responsibility |
+|---|---|
+| `src/scenario-system/` | Versioned JSON types, validation, normalization, migration, compilation, import/export, session and runtime; objectives, guidance, command messages and world scale |
+| `src/scenarios/` | Scenario data and presets; fleet/air adapters also retain domain presets |
+| `src/space-weather/`, `src/environment/` | Deterministic timeline/spatial propagation effects and weather-front runtime |
+| `src/lost-comms/` | Doctrine catalog and loss/recovery runtime |
+| `src/audio/` | Dynamic score and theme-track lifecycle |
+| `src/arm/` | Emitter state, observed emitter tracks, ARM seeker lifecycle and SEAD integration |
+| `src/sensors/` | Passive IRST/ESM contracts and calculations |
+| `src/cec/` | Measurements, covariance, fusion, network, engagement support, missile updates and observability |
+| `src/radar/` | Shared horizon/RCS/unit contracts and optional air-search Doppler factor |
+| `src/tracks/` | Track-conflict fusion |
+| `src/defense/` | Shared target-source registry, observation policy and engagement settlement |
+| `src/surface/` | Surface-asset gallery; friendly strike execution uses `surface-combat.ts` and `surface-doctrine.ts` |
+| `src/input.ts` | Shared typing-target guard used by UI hotkeys |
+| `scripts/`, `.github/workflows/` | Domain/browser verification and Review CI; catalogs are read as literals, not executed |
 
 - `src/main.ts`: scene orchestration, UI adapters, and the frame loop.
 - `src/combat-entity.ts`: side-neutral entity and target contracts shared by aircraft, ships, missiles, and decoys.
@@ -16,7 +35,7 @@ The simulation is organized around capabilities rather than ship-name checks.
 - `src/defense/engagement.ts`: stable-ID engagement authorization, commitment, and hit/miss/cancel settlement shared by launchers and aircraft hardpoints.
 - `src/air/types.ts`: aircraft, mission, observed-track, weapon, countermeasure, and damage contracts.
 - `src/air/catalog.ts`: game-scaled F-14A, Tu-16K, A-6E, AIM-54A, AIM-7F, AIM-9L, KSR-5, and AGM-84A capability data.
-- `src/air/models.ts`: reusable procedural aircraft geometry and stable animation anchors.
+- `src/air/models.ts`: compatibility model facade; `src/air/model-assets/` and `src/air/aew/model-assets/` own procedural geometry and stable animation anchors.
 - `src/air/scenarios.ts`: scenario-owned `joint`, `intercept`, and `strike` presets with aircraft formations, spawn geometry, mission overrides, and protected-formation relationships.
 - `src/air/runtime.ts`: air-system scheduler and integration boundary. It applies AI/flight outputs, advances tracks, weapons, countermeasures, and damage, and emits events. New aircraft-specific tactics and flight equations do not belong here. It exposes incoming anti-ship missiles but does not own or spawn shipboard weapons.
 - `src/air/ai/flight-director.ts`: the advanced-flight integration facade. It converts a maneuver intent into bounded heading, bank, speed, fuel, thrust, and persistent energy-state outputs without owning mission or weapon policy.
@@ -35,7 +54,7 @@ The simulation is organized around capabilities rather than ship-name checks.
 - `src/air/ai/maneuver-library.ts`, `tactical-state.ts`, and `tactical-planner.ts`: pure BVR geometry, persistent mode/hysteresis state, and observation-driven selection of commit, crank, notch, drag, and pump. Engagement exclusion and missile support are separate: a committed target cannot be selected for another shot, but its organic support track may continue to drive guidance and maneuver.
 - `AirScenarioContext.advancedAirAiEnabled` is a computation gate. Disabled aircraft execute only the compatibility `flight-dynamics.ts` path; enabled aircraft execute the advanced facade through one branch in the scheduler. UI state is passed through `air/ship-bridge.ts`, not read by flight modules.
 - `src/datalink/types.ts`: side-neutral tactical-network participant, track-report, delivery, provenance, and diagnostic contracts.
-- `src/datalink/era.ts`: communication-era capability matrix and eligibility gates. `ntu-baseline` enables ship Link 11 only; `jtids-transition` keeps ship Link 11 while permitting eligible airborne JTIDS terminals; `link16-modernized` uses eligible US air and ship Link 16 terminals; `cec-enabled` remains locked until a real measurement-fusion runtime exists.
+- `src/datalink/era.ts`: communication-era capability matrix and eligibility gates. `ntu-baseline` enables ship Link 11 only; `jtids-transition` keeps ship Link 11 while permitting eligible airborne JTIDS terminals; `link16-modernized` uses eligible US air and ship Link 16 terminals; `cec-enabled` additionally permits the separately implemented CEC service for eligible participants.
 - `src/datalink/link11-network.ts`: deterministic Link 11/TADIL-A roll-call runtime. It elects an eligible Net Control Station, polls one live same-coalition participant per response window, derives the full cycle from net size, bounds per-station queues, and applies modem/queue delay, terminal/range loss, uncertainty growth, and report-quality degradation. It does not emulate Link 16 TDMA or priority pre-emption.
 - `src/datalink/link16-network.ts`: deterministic Link 16/JTIDS game-scale runtime. It owns TDMA capacity, priority slots, queue pressure, propagation delay, terminal/time-sync health, range loss, coalition isolation, copied reports, observation deduplication, and inbox delivery. It never owns target entities or weapon authorization.
 - `src/datalink/observability.ts`: read-only node, remote-track, activity, and diagnostic snapshot contracts shared by simulation producers and visualization consumers.
@@ -112,9 +131,17 @@ Both tactical networks preserve this boundary. Link 11 reports receive the large
 
 Era and operator controls are runtime gates, not cosmetic UI state. A configuration change resets roll-call/TDMA state, pending reports, remote aircraft tracks, and ship cues before rebuilding only eligible participants. The NTU baseline therefore cannot retain a modernized track from an earlier selection. The tactical-data-link switch disconnects every network available in the selected era without changing platform catalog data. Soviet entities remain excluded because they declare no compatible terminal, not because either network contains a red-side special case.
 
-CEC is deliberately not implemented by increasing Link 16 quality. A future CEC service must exchange time-synchronized sensor measurements with covariance and calibration provenance, build a composite engagement-quality track, and declare explicit weapon/platform support. It must still preserve physical launcher, midcourse-update, illumination/seeker, and terminal-acquisition requirements.
+CEC is implemented separately in `src/cec/`, with timestamped measurements, covariance fusion, participant eligibility, engagement support and missile updates. Long Beach, CG-57 and E-2C participate only in the explicit `cec-enabled` configuration. Link 11/16 sharing alone is not CEC. Remote support must still preserve physical launcher, illumination/seeker and terminal-acquisition requirements; historical AIM-54A/C updates remain tied to the launching F-14/AWG-9. The hypothetical AIM-54X CEC variant has a separate capability contract.
 
 `selectConsumerTarget()` is the only target-ranking entry point. It applies accepted target kinds, domain scoring, and an optional engagement-ledger filter before returning an observation. Air OODA excludes already committed targets during ranking so it can select the next valid contact; ship doctrine supplies its own shoot-look-reengage eligibility before using the same consumer.
+
+## Units and observation contracts
+
+- `src/scenario-system/world-scale.ts` resolves horizontal `worldUnitsPerKm` (default 10). Distance displays, radar geometry and Tacview horizontal export use the scenario scale.
+- Sensor/Tacview altitude uses `SENSOR_ALTITUDE_METERS_PER_UNIT = 50`; advanced-flight equations retain the separate `WORLD_ALTITUDE_TO_METERS = 100` calibration. The 2 m/unit aircraft model scale is visual. These are distinct boundaries, not interchangeable constants.
+- `CombatPicture.Track.uncertainty` and `ShipTrackEstimate.uncertainty` are metres; air/platform tracks and CEC covariance inputs use world-space units. Convert at adapters using the shared radar helpers before fusion, association or rendering.
+- `src/radar/model.ts` owns the shared horizon and named RCS profiles. Maritime cue scaling affects cue quality rather than silently changing catalog range envelopes.
+- `src/radar/doppler.ts` applies optional catalog-defined look-down filtering to air search probability and track quality. It compensates ownship translation against ground-referenced clutter; it does not implement PRF, terrain or an independent missile-seeker notch filter. See the [radar specification](docs/zh/RADAR-MODEL.md).
 
 ## Adding a ship
 
@@ -224,6 +251,6 @@ Reusable equipment factories own equipment geometry and animation anchors, but n
 
 ## Rendering pipeline
 
-The current renderer is WebGL 2 with PBR materials, ACES Filmic tone mapping, and `RenderPass -> SSAO -> UnrealBloom -> OutputPass`. SSAO is disabled on narrow mobile viewports. Rendering diagnostics are exposed through canvas dataset fields, including `renderPipeline`, `oceanBackend`, and `activeThreatParticles`.
+The stable scene renderer is WebGL 2 with PBR materials, tone mapping and postprocessing. Opt-in WebGPU Ultra uses a hybrid WebGL scene/WebGPU compute backend for clouds, atmosphere, ocean and particles; it is experimental, with explicit capability/failure fallback. Rendering diagnostics expose the active backend rather than treating the selected quality tier as proof of compute execution.
 
-`OceanSurface` owns its object, animation, resize lifecycle, and disposal. The combat frame loop only calls that contract and must not read geometry buffers. A future `WebgpuFftOcean` backend should provide spectrum initialization, horizontal and vertical inverse FFT compute passes, displacement/normal textures, and a Jacobian-derived foam texture. Backend selection must include feature detection, a WebGL fallback, and a WebGPU-compatible replacement for the current postprocessing chain; it must not claim WebGPU support while routing compute work back through the CPU implementation.
+`OceanSurface` owns its object, animation, resize lifecycle and disposal. The combat frame loop calls that contract without reading geometry buffers. Ultra already computes a deterministic FFT spectrum and displacement/Jacobian atlas for WebGL sampling; the CPU implementation remains an explicit initialization fallback and test baseline. Backend and active-compute checks are distinct. See [WebGPU Ultra](docs/WEBGPU_ULTRA.md) for passes, diagnostics and limitations, and [renderer migration](docs/WEBGPU_RENDERER_MIGRATION.md) for the separate native-renderer work.

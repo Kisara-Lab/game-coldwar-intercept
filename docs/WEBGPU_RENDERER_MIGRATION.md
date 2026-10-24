@@ -1,7 +1,7 @@
 # Native WebGPU Renderer Migration
 
-> Documentation snapshot: v1.0.0 · 2026-07-26<br>
-> This page describes the v1.0.0 implementation and may change later.
+> Current main migration/lab notes · reviewed 2026-10-24.<br>
+> Native renderer work remains experimental and separate from the production hybrid backend. This is not a v1.0.0 release specification; see [release boundaries](../CHANGELOG.md) and [current Ultra implementation](WEBGPU_ULTRA.md).
 
 The production scene remains on the validated hybrid WebGL 2 + WebGPU compute path while native renderer parity is built behind `/webgpu-lab.html`.
 

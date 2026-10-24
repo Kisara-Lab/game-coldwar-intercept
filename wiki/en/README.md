@@ -19,7 +19,7 @@ This Wiki documents the implemented 3D Cold War naval and air-intercept simulati
 
 **CEC (Cooperative Engagement Capability)**: implemented as a separate measurement-fusion layer. Only the explicit `cec-enabled` era registers Long Beach, CG-57 and E-2C. See [CEC](MECHANICS/CEC.md).
 
-**Anti-radiation operations and missiles**: roadmap item; passive emitter tracks and EMCON are available, but dedicated anti-radiation weapons are not yet implemented.
+**Anti-radiation operations and missiles**: implemented emitter tracks, ARM seeker lifecycle and era-gated SEAD integration. The `MIG-29A-SEAD` / `Kh-31P-C` pair is a fictional late-Soviet capability. See [version boundaries](VERSIONING.md) and [architecture](../../ARCHITECTURE.md).
 
 ## Newly documented systems
 

@@ -1,7 +1,7 @@
 # WebGPU Ultra
 
-> Documentation snapshot: v1.0.0 · 2026-07-26<br>
-> This page describes the v1.0.0 implementation and may change later.
+> Current main implementation notes · reviewed 2026-10-24.<br>
+> Package/HUD remain v1.21.1. This describes the implemented hybrid backend, not the contents of a historical v1.0.0 tag; see [release boundaries](../CHANGELOG.md).
 
 `WEBGPU ULTRA` is an opt-in rendering tier. It does not replace the stable WebGL 2 renderer.
 

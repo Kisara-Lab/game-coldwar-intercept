@@ -1,4 +1,4 @@
-import { createSovietThreatModel } from "./model-helpers.js";
+import { createKh22RefinedModel } from "./kh22-refined.js";
 import type { ThreatDefinition } from "./types.js";
 
 export const KH22 = {
@@ -36,25 +36,5 @@ export const KH22 = {
     spread: 190,
     range: 1000,
   },
-  createModel: () =>
-    createSovietThreatModel({
-      identity: "Kh-22",
-      length: 11,
-      radius: 0.72,
-      skinColor: 0xb7b9ad,
-      bandColor: 0xd8d9cf,
-      noseLength: 2.8,
-      wingSpan: 4.8,
-      wingChord: 3.4,
-      finThickness: 0.13,
-      finHeight: 2.2,
-      dorsalDetails: true,
-      exhaustLength: 6,
-      exhaustColor: 0xffd37a,
-      mistRadius: 1.45,
-      mistLength: 9,
-      seekerRadius: 8,
-      seekerLength: 30,
-      shockCone: true,
-    }),
+  createModel: () => createKh22RefinedModel(),
 } as const satisfies ThreatDefinition;

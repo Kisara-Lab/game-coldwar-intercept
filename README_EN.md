@@ -47,6 +47,14 @@ v1.20.0 gives USS Long Beach (CGN-9), USS Lake Champlain (CG-57), and the Projec
 
 A dedicated surface-asset gallery captures 18 fixed Ultra/High/Standard views serially through one Chromium renderer and reports visible dimensions and triangle counts. Low-detail proxies are display-only and own no magazine, cell, hardpoint, or firing authority; runtime verification still requires CG-57 to complete physical departure from its own operational Mk 41 cells.
 
+## Kh-22 Three-Tier Refined Model
+
+Kh-22 now uses a dedicated procedural asset instead of the generic Soviet-missile silhouette. A long ogival radome, swept main wings, root fairings, cruciform tail fins, and an engine nozzle define its identity across every tier; Ultra adds access hatches, latches, and flush rivets. Repeated parts are batched by material so additional detail does not add an equal number of draw calls.
+
+- Ultra: 10,000 triangles and 14 visible meshes; High: 5,000 triangles and 13 visible meshes; Standard: 1,852 triangles and 11 visible meshes.
+- All tiers share the same overall dimensions and `-Z` forward axis. Low always uses Standard, High uses the medium tier before switching to Standard at distance, and Ultra steps through all three tiers by camera distance.
+- This is a visual-only replacement. Flight, damage, RCS, terminal maneuver, particle trail, sea mist, seeker cone, and shock-cone parameters remain unchanged.
+
 ## Validation Evidence
 
 ![Fleet physical-launch verification](verification-fleet-launch-cycle.png)

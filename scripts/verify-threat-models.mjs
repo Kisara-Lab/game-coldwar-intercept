@@ -2,9 +2,40 @@ import * as THREE from "three";
 import assert from "node:assert/strict";
 globalThis.window={devicePixelRatio:1};
 const { THREAT_DEFINITIONS }=await import("../dist-test/threats/catalog.js");
+const { updateRegisteredAssetDetailLods }=await import("../dist-test/visual/asset-detail-lod.js");
+
+function verifyKh22Tiers(model) {
+  const names=["Ultra","High","Standard"];
+  const tiers=names.map((name)=>model.getObjectByName(`Kh-22 ${name}`));
+  tiers.forEach((tier,index)=>{
+    assert(tier,`Kh-22 ${names[index]} tier`);
+    for(const part of ["airframe-body","radar-radome","main-wings","control-fins","engine-nozzle"]) {
+      const partObject=tier.getObjectByName(part);
+      assert(partObject,`Kh-22 ${names[index]} ${part}`);
+      let partTriangles=0;
+      partObject.traverse((object)=>{if(object.isMesh)partTriangles+=(object.geometry.index?.count??object.geometry.attributes.position.count)/3;});
+      const partSize=new THREE.Box3().setFromObject(partObject).getSize(new THREE.Vector3());
+      assert(partTriangles>0&&Number.isFinite(partSize.length())&&partSize.length()>0,`Kh-22 ${names[index]} nondegenerate ${part}`);
+    }
+    let meshes=0,triangles=0;
+    tier.traverse((object)=>{if(!object.isMesh)return;meshes++;triangles+=(object.geometry.index?.count??object.geometry.attributes.position.count)/3;});
+    assert(meshes<=[16,15,13][index],`Kh-22 ${names[index]} mesh budget`);
+    assert.equal(triangles,[10000,5000,1852][index],`Kh-22 ${names[index]} expected triangles`);
+  });
+  const bounds=tiers.map((tier)=>new THREE.Box3().setFromObject(tier).getSize(new THREE.Vector3()));
+  for(const axis of ["x","y","z"])assert(Math.abs(bounds[0][axis]-bounds[2][axis])<0.06,`Kh-22 shared ${axis} extent`);
+  for(const [quality,distance,expected] of [["ultra",40,"Ultra"],["ultra",120,"High"],["ultra",300,"Standard"],["high",40,"High"],["high",300,"Standard"],["low",40,"Standard"]]) {
+    updateRegisteredAssetDetailLods(model,new THREE.Vector3(0,0,distance),quality);
+    for(let index=0;index<tiers.length;index++)assert.equal(tiers[index].visible,names[index]===expected,`Kh-22 ${quality}@${distance}`);
+    let visibleMeshes=0;
+    tiers[names.indexOf(expected)].traverse((object)=>{if(object.isMesh&&object.visible)visibleMeshes++;});
+    assert(visibleMeshes>0,`Kh-22 ${quality}@${distance} visible geometry`);
+  }
+}
 
 const result=THREAT_DEFINITIONS.map((definition)=>{
   const model=definition.createModel();let meshes=0,mapped=0;
+  if(definition.id==="Kh-22")verifyKh22Tiers(model);
   model.traverse((object)=>{if(!object.isMesh)return;meshes++;const materials=Array.isArray(object.material)?object.material:[object.material];if(materials.some((material)=>material.map&&material.roughnessMap&&material.normalMap))mapped++;});
   // Hidden sensor cones and particle buffers are not airframe dimensions.
   for (const key of ["particleTrail", "seekerFov", "shockCone"]) model.userData[key]?.removeFromParent();
